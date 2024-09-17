@@ -3,7 +3,6 @@ package dat.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -12,25 +11,14 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Entity
-
-public class Movie {
+public class Director {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-    private String title;
-    private LocalDate releaseDate;
-    private double voteAverage;
 
-    @ManyToMany
-    private List<Actor> actors;
+    private String name;
 
-    @ManyToOne
-    private Director director;
-
-    @ManyToMany
-    private List<Genre> genres;
-
-
-
+    @OneToMany
+    private List<Movie> movies;
 }
