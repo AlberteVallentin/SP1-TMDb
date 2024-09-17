@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +33,7 @@ public class MovieFetcher {
 
         // Step 2: For each movie ID, fetch details including actors, director, genre, and rating
         fetchDetailsForMovies(client, movieIds);
+        System.out.println("number of fetched movies: " + movieIds.size());
     }
 
     // Step 1: Fetch all Danish movie IDs between 2019-09-17 and 2024-09-17
@@ -79,14 +82,28 @@ public class MovieFetcher {
 
 
     // Step 2: Fetch details for each movie ID, including actors, director, genre, and rating
+
     private static void fetchDetailsForMovies(HttpClient client, List<Long> movieIds) throws Exception {
+        // Limit concurrent requests to 10
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
         List<CompletableFuture<Void>> futures = movieIds.stream()
-            .map(movieId -> fetchMovieDetails(client, movieId))
+            .map(movieId -> CompletableFuture.runAsync(() -> {
+                try {
+                    fetchMovieDetails(client, movieId).join();
+                    // Sleep for 100ms to avoid rate limiting and make sure we get all responses
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }, executor))
             .collect(Collectors.toList());
 
         // Wait for all async calls to complete
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        executor.shutdown();
     }
+
 
     // Fetch movie details, including actors, director, genre, and rating
     private static CompletableFuture<Void> fetchMovieDetails(HttpClient client, long movieId) {
@@ -104,13 +121,17 @@ public class MovieFetcher {
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode movieDetails = mapper.readTree(responseBody);
 
-                    String title = movieDetails.get("title").asText();
+                    String title = movieDetails.get("original_title").asText();
+                    String englishTitle = movieDetails.get("title").asText();
                     String releaseDate = movieDetails.get("release_date").asText();
                     double rating = movieDetails.get("vote_average").asDouble();
 
                     System.out.println("Title: " + title);
+                    System.out.println("English title: " + englishTitle);
                     System.out.println("Release Date: " + releaseDate);
                     System.out.println("Rating: " + rating);
+                    System.out.println("ID: " + movieId);
+
 
                     // Extract genres
                     JsonNode genres = movieDetails.get("genres");
