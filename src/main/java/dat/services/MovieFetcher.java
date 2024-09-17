@@ -14,10 +14,14 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dat.dtos.ActorDTO;
+import dat.dtos.DirectorDTO;
+import dat.dtos.GenreDTO;
+import dat.dtos.MovieDTO;
 
 public class MovieFetcher {
 
-    private static final String API_KEY =  System.getenv("API_KEY");
+    private static final String API_KEY = System.getenv("API_KEY");
     private static final String DISCOVER_URL = "https://api.themoviedb.org/3/discover/movie";
     private static final String MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/";
 
@@ -27,13 +31,15 @@ public class MovieFetcher {
         // Step 1: Fetch Danish movies between 2019-09-10 and 2024-09-10
         List<Long> movieIds = fetchDanishMovies(client);
         System.out.println("Movie IDs: " + movieIds);
-        System.out.println("the last 20 movie id's: " + movieIds.subList(movieIds.size()-20, movieIds.size()));
+        System.out.println("the last 20 movie id's: " + movieIds.subList(movieIds.size() - 20, movieIds.size()));
         System.out.println("Movie IDs size: " + movieIds.size());
 
 
         // Step 2: For each movie ID, fetch details including actors, director, genre, and rating
         fetchDetailsForMovies(client, movieIds);
         System.out.println("number of fetched movies: " + movieIds.size());
+
+
     }
 
     // Step 1: Fetch all Danish movie IDs between 2019-09-17 and 2024-09-17
@@ -105,8 +111,8 @@ public class MovieFetcher {
     }
 
 
-    // Fetch movie details, including actors, director, genre, and rating
-    private static CompletableFuture<Void> fetchMovieDetails(HttpClient client, long movieId) {
+    // MovieFetcher.java
+    private static CompletableFuture<MovieDTO> fetchMovieDetails(HttpClient client, long movieId) {
         String url = MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=credits";
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -115,55 +121,64 @@ public class MovieFetcher {
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
             .thenApply(HttpResponse::body)
-            .thenAccept(responseBody -> {
+            .thenApply(responseBody -> {
                 try {
                     // Parse movie details
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode movieDetails = mapper.readTree(responseBody);
 
-                    String title = movieDetails.get("original_title").asText();
-                    String englishTitle = movieDetails.get("title").asText();
-                    String releaseDate = movieDetails.get("release_date").asText();
-                    double rating = movieDetails.get("vote_average").asDouble();
+                    MovieDTO movieDTO = new MovieDTO();
+                    movieDTO.setTitle(movieDetails.get("original_title").asText());
+                    movieDTO.setEnglishTitle(movieDetails.get("title").asText());
 
-                    System.out.println("Title: " + title);
-                    System.out.println("English title: " + englishTitle);
-                    System.out.println("Release Date: " + releaseDate);
-                    System.out.println("Rating: " + rating);
-                    System.out.println("ID: " + movieId);
+                    // Check if release_date is not null or empty
+                    JsonNode releaseDateNode = movieDetails.get("release_date");
+                    if (releaseDateNode != null && !releaseDateNode.asText().isEmpty()) {
+                        movieDTO.setReleaseDate(LocalDate.parse(releaseDateNode.asText()));
+                    } else {
+                        movieDTO.setReleaseDate(null); // Allow null value
+                        System.err.println("Warning: 'release_date' is empty or null for movie ID: " + movieId);
+                    }
 
+                    movieDTO.setVoteAverage(movieDetails.get("vote_average").asDouble());
 
                     // Extract genres
                     JsonNode genres = movieDetails.get("genres");
-                    List<String> genreList = new ArrayList<>();
+                    List<GenreDTO> genreList = new ArrayList<>();
                     for (JsonNode genre : genres) {
-                        genreList.add(genre.get("name").asText());
+                        GenreDTO genreDTO = new GenreDTO();
+                        genreDTO.setGenreName(genre.get("name").asText());
+                        genreList.add(genreDTO);
                     }
-                    System.out.println("Genres: " + String.join(", ", genreList));
+                    movieDTO.setGenres(genreList);
 
                     // Extract actors
                     JsonNode cast = movieDetails.get("credits").get("cast");
-                    List<String> actorList = new ArrayList<>();
+                    List<ActorDTO> actorList = new ArrayList<>();
                     for (JsonNode actor : cast) {
-                        actorList.add(actor.get("name").asText());
+                        ActorDTO actorDTO = new ActorDTO();
+                        actorDTO.setName(actor.get("original_name").asText());
+                        actorList.add(actorDTO);
                     }
-                    System.out.println("Actors: " + String.join(", ", actorList));
+                    movieDTO.setActors(actorList);
 
-                    // Extract director (from crew)
+                    // Extract director
                     JsonNode crew = movieDetails.get("credits").get("crew");
                     for (JsonNode crewMember : crew) {
                         if ("Director".equals(crewMember.get("job").asText())) {
-                            String director = crewMember.get("name").asText();
-                            System.out.println("Director: " + director);
+                            DirectorDTO directorDTO = new DirectorDTO();
+                            directorDTO.setName(crewMember.get("name").asText());
+                            movieDTO.setDirector(directorDTO);
                             break;
                         }
                     }
 
-                    System.out.println("=====================================");
+                    return movieDTO;
+
                 } catch (Exception e) {
                     e.printStackTrace();
+                    return null;
                 }
             });
     }
 }
-
