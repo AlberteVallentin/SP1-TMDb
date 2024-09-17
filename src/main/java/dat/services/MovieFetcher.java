@@ -42,7 +42,7 @@ public class MovieFetcher {
 
     }
 
-    // Step 1: Fetch all Danish movie IDs between 2019-09-17 and 2024-09-17
+    // Fetch all Danish movie ID's between 2019-09-17 and 2024-09-17
     private static List<Long> fetchDanishMovies(HttpClient client) throws Exception {
         List<Long> movieIds = new ArrayList<>();
         int page = 1;
@@ -87,7 +87,7 @@ public class MovieFetcher {
     }
 
 
-    // Step 2: Fetch details for each movie ID, including actors, director, genre, and rating
+    // Fetch details for each movie ID, including actors, director, genre, and vote average
 
     private static void fetchDetailsForMovies(HttpClient client, List<Long> movieIds) throws Exception {
         // Limit concurrent requests to 10

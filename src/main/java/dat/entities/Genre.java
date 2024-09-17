@@ -17,7 +17,7 @@ public class Genre {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "genre_name", nullable = false)
+    @Column(name = "genre_name", nullable = false, unique = true)
     private String genreName;
 
     @ManyToMany
