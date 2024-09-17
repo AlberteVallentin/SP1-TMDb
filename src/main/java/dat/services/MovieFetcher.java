@@ -111,7 +111,7 @@ public class MovieFetcher {
     }
 
 
-    // MovieFetcher.java
+    // MovieFetcher
     private static CompletableFuture<MovieDTO> fetchMovieDetails(HttpClient client, long movieId) {
         String url = MOVIE_DETAILS_URL + movieId + "?api_key=" + API_KEY + "&append_to_response=credits";
 
