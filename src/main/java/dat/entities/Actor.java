@@ -20,7 +20,8 @@ public class Actor {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToMany
+
+    @ManyToMany(mappedBy = "actors")
     private List<Movie> movies;
 
 }

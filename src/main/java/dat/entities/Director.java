@@ -19,6 +19,6 @@ public class Director {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "director")
     private List<Movie> movies;
 }

@@ -20,6 +20,7 @@ public class Genre {
     @Column(name = "genre_name", nullable = false, unique = true)
     private String genreName;
 
-    @ManyToMany
+
+    @ManyToMany(mappedBy = "genres")
     private List<Movie> movies;
 }
