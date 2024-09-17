@@ -1,9 +1,11 @@
 package dat.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
+@Data
+@NoArgsConstructor
 public class ActorDTO {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 }
 

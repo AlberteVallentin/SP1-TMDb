@@ -18,8 +18,12 @@ public class Movie {
     @Column(name = "id", nullable = false)
     private Long id;
     private String title;
+    private String englishTitle;
     private LocalDate releaseDate;
     private double voteAverage;
+
+    @ManyToMany
+    private List<Genre> genres;
 
     @ManyToMany
     private List<Actor> actors;
@@ -27,8 +31,7 @@ public class Movie {
     @ManyToOne
     private Director director;
 
-    @ManyToMany
-    private List<Genre> genres;
+
 
 
 
