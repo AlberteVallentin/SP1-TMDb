@@ -1,5 +1,6 @@
 package dat.entities;
 
+import dat.dtos.DirectorDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,4 +22,8 @@ public class Director {
 
     @OneToMany(mappedBy = "director")
     private List<Movie> movies;
+
+    public Director(DirectorDTO directorDTO) {
+        this.name = directorDTO.getName();
+    }
 }

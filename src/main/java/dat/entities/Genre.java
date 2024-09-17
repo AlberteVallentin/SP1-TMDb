@@ -1,5 +1,6 @@
 package dat.entities;
 
+import dat.dtos.GenreDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,4 +24,9 @@ public class Genre {
 
     @ManyToMany(mappedBy = "genres")
     private List<Movie> movies;
+
+
+    public Genre(GenreDTO genreDTO) {
+        this.genreName = genreDTO.getGenreName();
+    }
 }

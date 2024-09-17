@@ -1,10 +1,12 @@
 package dat.entities;
 
+import dat.dtos.MovieDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 
@@ -38,8 +40,18 @@ public class Movie {
     @JoinColumn(name = "director_id")
     private Director director;
 
-
-
-
-
+    public Movie(MovieDTO movieDTO) {
+        this.title = movieDTO.getTitle();
+        this.englishTitle = movieDTO.getEnglishTitle();
+        this.releaseDate = movieDTO.getReleaseDate();
+        this.voteAverage = movieDTO.getVoteAverage();
+        this.genres = movieDTO.getGenres().stream().map(Genre::new).collect(Collectors.toList());
+        this.actors = movieDTO.getActors().stream().map(Actor::new).collect(Collectors.toList());
+        if (movieDTO.getDirector() != null) {
+            this.director = new Director(movieDTO.getDirector());
+        } else {
+            this.director = null;
+        }
+    }
 }
+
