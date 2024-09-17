@@ -24,39 +24,59 @@ public class MovieFetcher {
 
         // Step 1: Fetch Danish movies between 2019-09-10 and 2024-09-10
         List<Long> movieIds = fetchDanishMovies(client);
+        System.out.println("Movie IDs: " + movieIds);
+        System.out.println("the last 20 movie id's: " + movieIds.subList(movieIds.size()-20, movieIds.size()));
+        System.out.println("Movie IDs size: " + movieIds.size());
+
 
         // Step 2: For each movie ID, fetch details including actors, director, genre, and rating
-        //fetchDetailsForMovies(client, movieIds);
+        fetchDetailsForMovies(client, movieIds);
     }
 
     // Step 1: Fetch all Danish movie IDs between 2019-09-17 and 2024-09-17
     private static List<Long> fetchDanishMovies(HttpClient client) throws Exception {
-        String url = DISCOVER_URL + "?api_key=" + API_KEY +
-            "&with_origin_country=DK" +
-            "&release_date.gte=2019-09-17" +
-            "&release_date.lte=2024-09-17" +
-            "&sort_by=release_date.asc";
-
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        String responseBody = response.body();
-
-        // Parse the response
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(responseBody);
-        JsonNode results = rootNode.get("results");
-
         List<Long> movieIds = new ArrayList<>();
-        for (JsonNode movieNode : results) {
-            long movieId = movieNode.get("id").asLong();
-            movieIds.add(movieId);
-        }
+        int page = 1;
+        int totalPages;
+
+        do {
+            String url = DISCOVER_URL + "?api_key=" + API_KEY +
+                "&with_origin_country=DK" +
+                "&release_date.gte=2019-09-17" +
+                "&release_date.lte=2024-09-17" +
+                "&sort_by=release_date.asc" +
+                "&page=" + page;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+
+            // Parse the response
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(responseBody);
+            JsonNode results = rootNode.get("results");
+            totalPages = rootNode.get("total_pages").asInt();
+
+            // Check if results is not null
+            if (results == null) {
+                System.err.println("Error: 'results' field is missing in the response.");
+                break;
+            }
+
+            for (JsonNode movieNode : results) {
+                long movieId = movieNode.get("id").asLong();
+                movieIds.add(movieId);
+            }
+            page++;
+
+        } while (page <= totalPages);
 
         return movieIds;
     }
+
 
     // Step 2: Fetch details for each movie ID, including actors, director, genre, and rating
     private static void fetchDetailsForMovies(HttpClient client, List<Long> movieIds) throws Exception {

@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @Entity
 public class Director {
