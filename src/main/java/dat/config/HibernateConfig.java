@@ -35,6 +35,7 @@ public class HibernateConfig {
        configuration.addAnnotatedClass(Director.class);
        configuration.addAnnotatedClass(Genre.class);
        configuration.addAnnotatedClass(Movie.class);
+
     }
 
     private static EntityManagerFactory createEMF(boolean forTest, String DBName) {
