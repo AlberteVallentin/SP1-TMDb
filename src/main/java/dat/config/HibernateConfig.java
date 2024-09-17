@@ -4,7 +4,6 @@ import dat.entities.Actor;
 import dat.entities.Director;
 import dat.entities.Genre;
 import dat.entities.Movie;
-import dat.entities.Person;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
