@@ -34,9 +34,17 @@ public class MovieDTO {
         this.voteAverage = movie.getVoteAverage();
 
         // Convert Genre, Actor, Director to DTOs
-        this.genres = movie.getGenres().stream().map(GenreDTO::new).collect(Collectors.toList());
-        this.actors = movie.getActors().stream().map(ActorDTO::new).collect(Collectors.toList());
-        this.director = new DirectorDTO(movie.getDirector());
+        this.genres = movie.getGenres()
+            .stream()
+            .map(GenreDTO::new)
+            .toList();
+        this.actors = movie.getActors()
+            .stream()
+            .map(ActorDTO::new)
+            .toList();
+
+        this.director = new DirectorDTO
+            (movie.getDirector());
     }
 }
 
