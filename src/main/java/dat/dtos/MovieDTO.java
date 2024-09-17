@@ -12,11 +12,19 @@ import lombok.*;
 @NoArgsConstructor
 
 public class MovieDTO {
+
     private Long id;
+
+
     private String title;
+
+
     private String englishTitle;
+
     private LocalDate releaseDate;
+
     private double voteAverage;
+
 
     private List<GenreDTO> genres;
 
