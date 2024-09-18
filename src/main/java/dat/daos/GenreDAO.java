@@ -19,27 +19,54 @@ public class GenreDAO implements IDAO<Genre> {
 
     @Override
     public void create(Genre entity) {
-
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(entity);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public Optional<Genre> findById(Long id) {
-        return Optional.empty();
+        try (EntityManager em = emf.createEntityManager()) {
+            Genre genre = em.find(Genre.class, id);  // Find genre by ID
+            return genre != null ? Optional.of(genre) : Optional.empty();  // Return an Optional
+        }
     }
 
     @Override
     public List<Genre> findAll() {
-        return List.of();
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Genre> query = em.createQuery("SELECT g FROM Genre g", Genre.class);
+            return query.getResultList();
+        }
     }
 
     @Override
     public void update(Genre entity) {
-
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.merge(entity);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void delete(Long id) {
-
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            Genre genre = em.find(Genre.class, id);  /
+            if (genre != null) {
+                em.remove(genre);
+            }
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
