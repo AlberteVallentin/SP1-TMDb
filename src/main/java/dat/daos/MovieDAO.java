@@ -80,10 +80,6 @@ public class MovieDAO implements IDAO<Movie> {
             em.close();
         }
     }
-}
-
-
-
 
 
 
