@@ -1,6 +1,7 @@
 package dat.services;
 
 import dat.daos.GenreDAO;
+import dat.dtos.GenreDTO;
 import dat.entities.Genre;
 
 import jakarta.persistence.EntityManagerFactory;
@@ -15,7 +16,8 @@ public class GenreService {
         this.genreDAO = new GenreDAO(emf);
     }
 
-    public void createGenre(Genre genre) {
+    public void createGenre(GenreDTO genreDTO) {
+        Genre genre = new Genre(genreDTO);
         genreDAO.create(genre);
     }
 
@@ -27,7 +29,16 @@ public class GenreService {
         return genreDAO.findAll();
     }
 
-    public void updateGenre(Genre genre) {
+    public void updateGenre(GenreDTO genreDTO) {
+        Genre genre = new Genre(genreDTO);
+        Optional<Genre> optionalGenre = genreDAO.findById(genreDTO.getId());
+        if (optionalGenre.isPresent()) {
+            genre = optionalGenre.get();
+            genre.setGenreName(genreDTO.getGenreName());
+            genreDAO.update(genre);
+        } else {
+            throw new IllegalArgumentException("Genre with ID " + genreDTO.getId() + " not found.");
+        }
         genreDAO.update(genre);
     }
 
