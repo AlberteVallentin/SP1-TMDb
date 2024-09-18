@@ -59,7 +59,7 @@ public class GenreDAO implements IDAO<Genre> {
     public void delete(Long id) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Genre genre = em.find(Genre.class, id);  /
+            Genre genre = em.find(Genre.class, id);
             if (genre != null) {
                 em.remove(genre);
             }

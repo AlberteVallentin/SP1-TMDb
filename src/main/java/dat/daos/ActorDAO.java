@@ -15,40 +15,59 @@ public class ActorDAO implements IDAO<Actor> {
     public ActorDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
+
     @Override
     public void create(Actor entity) {
-
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(entity);
+            em.getTransaction().commit();
+        }
     }
 
     @Override
     public Optional<Actor> findById(Long id) {
-        return Optional.empty();
+        try (EntityManager em = emf.createEntityManager()) {
+            Actor actor = em.find(Actor.class, id);
+            return actor != null ? Optional.of(actor) : Optional.empty();
+        }
     }
 
     @Override
     public List<Actor> findAll() {
-        return List.of();
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Actor> query = em.createQuery("SELECT a FROM Actor a", Actor.class);
+            return query.getResultList();
+        }
     }
 
     @Override
     public void update(Actor entity) {
-
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.merge(entity);
+            em.getTransaction().commit();
+        }
     }
 
     @Override
     public void delete(Long id) {
-
-    }
-
-    @Override
-    public Optional<Actor> findByName(String title) {
-        // Try-with-resources to ensure EntityManager is closed automatically
         try (EntityManager em = emf.createEntityManager()) {
-            // JPQL query where both name and actor's name are converted to lower case for case-insensitive comparison
-            TypedQuery<Actor> query = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class);
-            query.setParameter("name", title);
-            return query.getResultStream().findFirst();  // Return the first match or empty if none found
+            em.getTransaction().begin();
+            Actor actor = em.find(Actor.class, id);
+            if (actor != null) {
+                em.remove(actor);
+            }
+            em.getTransaction().commit();
         }
     }
 
+    @Override
+    public Optional<Actor> findByName(String name) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Actor> query = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class);
+            query.setParameter("name", name);
+            return query.getResultStream().findFirst();
+        }
+    }
 }
