@@ -1,5 +1,6 @@
 package dat.entities;
 
+import dat.dtos.DirectorDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,6 @@ import java.util.List;
 @Data
 
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @Entity
 public class Director {
@@ -17,8 +17,14 @@ public class Director {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "director")
     private List<Movie> movies;
+
+
+    public Director(DirectorDTO directorDTO) {
+        this.name = name;
+    }
 }

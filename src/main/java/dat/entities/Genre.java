@@ -1,5 +1,6 @@
 package dat.entities;
 
+import dat.dtos.GenreDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,6 @@ import java.util.List;
 @Data
 
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @Entity
 
@@ -21,6 +21,10 @@ public class Genre {
     @Column(name = "genre_name", nullable = false)
     private String genreName;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "genres")
     private List<Movie> movies;
+
+    public Genre(GenreDTO genreDTO) {
+        this.genreName = genreName;
+    }
 }

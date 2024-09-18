@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -39,6 +40,8 @@ public class MovieFetcher {
         int page = 1;
         int totalPage;
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
         do {
             String url = DISCOVER_URL + "?api_key=" + API_KEY +
                     "&with_origin_country=DK" +
@@ -61,9 +64,30 @@ public class MovieFetcher {
             totalPage = rootNode.get("total_pages").asInt();
 
 
+            if(results  == null) {
+                System.out.println("No movies found");
+                break;
+            }
+
             for (JsonNode movieNode : results) {
                 long movieId = movieNode.get("id").asLong();
-                movieIds.add(movieId);
+                JsonNode releaseDateNode = movieNode.get("release_date");
+
+                //check if realease date is null or empty
+
+                if(releaseDateNode != null && !releaseDateNode.asText().isEmpty()){
+                    String releaseDateStr = releaseDateNode.asText();
+                    LocalDate releasedate = LocalDate.parse(releaseDateStr, formatter);
+
+                    //filter movies by realase date
+                     if(!releasedate.isBefore(LocalDate.parse("2019-09-17", formatter)) && !releasedate.isAfter(LocalDate.parse("2024-09-17", formatter))){
+                         movieIds.add(movieId);
+                     }else {
+                         System.out.println("Movie with id: " + movieId + " is not between 2019-09-17 and 2024-09-17");
+                     }
+
+                }
+
             }
             page++;
         } while (page <= totalPage);
@@ -73,6 +97,12 @@ public class MovieFetcher {
 
     // Step 2: Fetch details for each movie ID, including actors, director, genre, and rating
     private static void fetchDetailsForMovies(HttpClient client, List<Long> movieIds) throws Exception {
+
+
+
+
+
+
         List<CompletableFuture<Void>> futures = movieIds.stream()
             .map(movieId -> fetchMovieDetails(client, movieId))
             .collect(Collectors.toList());
