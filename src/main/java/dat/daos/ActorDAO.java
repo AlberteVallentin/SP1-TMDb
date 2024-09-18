@@ -3,35 +3,32 @@ package dat.daos;
 import dat.entities.Actor;
 
 import java.util.List;
+import java.util.Optional;
 
-public class ActorDAO implements IDAO<Actor, Long> {
-    @Override
-    public Actor getById(Long id) {
-        return null;
-    }
+public class ActorDAO implements IDAO<Actor> {
 
     @Override
-    public void insert(Actor actor) {
-
-    }
-
-    @Override
-    public void update(Actor actor) {
+    public void create(Actor entity) {
 
     }
 
     @Override
-    public void delete(Actor actor) {
+    public Optional<Actor> findById(Long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Actor> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public void update(Actor entity) {
 
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
 
-    }
-
-    @Override
-    public List<Actor> getAll() {
-        return null;
     }
 }

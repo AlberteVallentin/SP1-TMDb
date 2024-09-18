@@ -3,35 +3,31 @@ package dat.daos;
 import dat.entities.Genre;
 
 import java.util.List;
+import java.util.Optional;
 
-public class GenreDAO implements IDAO<Genre, Long> {
+public class GenreDAO implements IDAO<Genre> {
     @Override
-    public Genre getById(Long id) {
-        return null;
-    }
-
-    @Override
-    public void insert(Genre genre) {
+    public void create(Genre entity) {
 
     }
 
     @Override
-    public void update(Genre genre) {
+    public Optional<Genre> findById(Long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Genre> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public void update(Genre entity) {
 
     }
 
     @Override
-    public void delete(Genre genre) {
+    public void delete(Long id) {
 
-    }
-
-    @Override
-    public void deleteById(Long id) {
-
-    }
-
-    @Override
-    public List<Genre> getAll() {
-        return null;
     }
 }

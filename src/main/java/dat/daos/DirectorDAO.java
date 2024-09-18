@@ -3,35 +3,32 @@ package dat.daos;
 import dat.entities.Director;
 
 import java.util.List;
+import java.util.Optional;
 
-public class DirectorDAO implements IDAO<Director, Long> {
-    @Override
-    public Director getById(Long id) {
-        return null;
-    }
+public class DirectorDAO implements IDAO<Director> {
 
     @Override
-    public void insert(Director director) {
-
-    }
-
-    @Override
-    public void update(Director director) {
+    public void create(Director entity) {
 
     }
 
     @Override
-    public void delete(Director director) {
+    public Optional<Director> findById(Long id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Director> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public void update(Director entity) {
 
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void delete(Long id) {
 
-    }
-
-    @Override
-    public List<Director> getAll() {
-        return null;
     }
 }

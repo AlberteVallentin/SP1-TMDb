@@ -9,14 +9,85 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
+import java.util.Optional;
 
-public class MovieDAO {
+public class MovieDAO implements IDAO<Movie> {
 
-    private EntityManagerFactory emf;
+    private final EntityManagerFactory  emf;
 
     public MovieDAO(EntityManagerFactory emf) {
         this.emf = emf;
     }
+
+    @Override
+    public void create(Movie movie) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(movie);  // Persisting the new movie into the database
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Optional<Movie> findById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Movie movie = em.find(Movie.class, id);  // Look up a movie by its ID
+            return movie != null ? Optional.of(movie) : Optional.empty();  // Return an Optional
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Movie> findAll() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m", Movie.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+    @Override
+    public void update(Movie movie) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.merge(movie);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void delete(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Movie movie = em.find(Movie.class, id);
+            if (movie != null) {
+                em.remove(movie);
+            }
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+}
+
+
+
+
+
+
+
 
     public void saveMovieWithDetails(Movie movie) {
         EntityManager em = emf.createEntityManager();
@@ -85,4 +156,6 @@ public class MovieDAO {
         query.setParameter("genreName", genreName);
         return query.getResultStream().findFirst().orElse(null);
     }
+
+
 }
