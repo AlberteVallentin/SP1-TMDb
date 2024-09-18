@@ -38,15 +38,11 @@ public class MovieFetcher {
 
         // Step 1: Fetch Danish movies between 2019-09-10 and 2024-09-10
         List<Long> movieIds = fetchDanishMovies(client);
-        System.out.println("Movie IDs: " + movieIds);
-        System.out.println("the last 20 movie id's: " + movieIds.subList(movieIds.size() - 20, movieIds.size()));
-        System.out.println("Movie IDs size: " + movieIds.size());
 
         // Step 2: Fetch details for each movie ID and return them as a list of MovieDTOs
         List<MovieDTO> movieDTOList = fetchDetailsForMovies(client, movieIds);
-        System.out.println("Fetched Movies: " + movieDTOList);
 
-        // Step 3: Convert and save these DTOs to entities and persist them to the database
+        // Step 3: Convert and save these DTO's to entities and persist them to the database
         saveMoviesToDatabase(movieDTOList);
     }
 
