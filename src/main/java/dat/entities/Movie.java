@@ -45,8 +45,14 @@ public class Movie {
         this.englishTitle = movieDTO.getEnglishTitle();
         this.releaseDate = movieDTO.getReleaseDate();
         this.voteAverage = movieDTO.getVoteAverage();
-        this.genres = movieDTO.getGenres().stream().map(Genre::new).collect(Collectors.toList());
-        this.actors = movieDTO.getActors().stream().map(Actor::new).collect(Collectors.toList());
+        this.genres = movieDTO.getGenres()
+            .stream()
+            .map(Genre::new)
+            .toList();
+        this.actors = movieDTO.getActors()
+            .stream()
+            .map(Actor::new)
+            .toList();
         if (movieDTO.getDirector() != null) {
             this.director = new Director(movieDTO.getDirector());
         } else {
