@@ -9,4 +9,5 @@ public interface IDAO<T> {
     List<T> findAll();
     void update(T entity);
     void delete(Long id);
+    Optional<T> findByName(String name);
 }

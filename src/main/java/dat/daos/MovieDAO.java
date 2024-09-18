@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class MovieDAO implements IDAO<Movie> {
 
-    private final EntityManagerFactory  emf;
+    private final EntityManagerFactory emf;
 
     public MovieDAO(EntityManagerFactory emf) {
         this.emf = emf;
@@ -21,136 +21,97 @@ public class MovieDAO implements IDAO<Movie> {
 
     @Override
     public void create(Movie movie) {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            em.persist(movie);  // Persisting the new movie into the database
+
+            ActorDAO actorDAO = new ActorDAO(emf);
+            DirectorDAO directorDAO = new DirectorDAO(emf);
+            GenreDAO genreDAO = new GenreDAO(emf);
+
+            // Check and save actors
+            for (Actor actor : movie.getActors()) {
+                Optional<Actor> existingActor = actorDAO.findByName(actor.getName());
+                if (existingActor.isPresent()) {
+                    actor.setId(existingActor.get().getId());
+                } else {
+                    em.persist(actor);
+                }
+            }
+
+            // Check and save director
+            Director director = movie.getDirector();
+            if (director != null) {
+               Optional<Director> existingDirector = directorDAO.findByName(director.getName());
+                if (existingDirector.isPresent()) {
+                    director.setId(existingDirector.get().getId());
+                } else {
+                    em.persist(director);
+                }
+            }
+
+            // Check and save genres
+            for (Genre genre : movie.getGenres()) {
+                Optional<Genre> existingGenre = genreDAO.findByName(genre.getGenreName());
+                if (existingGenre.isPresent()) {
+                    genre.setId(existingGenre.get().getId());
+                } else {
+                    em.persist(genre);
+                }
+            }
+
+            // Save the movie
+            em.persist(movie);
             em.getTransaction().commit();
-        } finally {
-            em.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
     @Override
     public Optional<Movie> findById(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             Movie movie = em.find(Movie.class, id);  // Look up a movie by its ID
-            return movie != null ? Optional.of(movie) : Optional.empty();  // Return an Optional
-        } finally {
-            em.close();
+            return movie != null ? Optional.of(movie) : Optional.empty();
         }
     }
 
     @Override
     public List<Movie> findAll() {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m", Movie.class);
             return query.getResultList();
-        } finally {
-            em.close();
         }
     }
 
-
     @Override
     public void update(Movie movie) {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             em.merge(movie);
             em.getTransaction().commit();
-        } finally {
-            em.close();
         }
     }
 
     @Override
     public void delete(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Movie movie = em.find(Movie.class, id);
             if (movie != null) {
                 em.remove(movie);
             }
             em.getTransaction().commit();
-        } finally {
-            em.close();
         }
     }
 
-
-
-
-
-    public void saveMovieWithDetails(Movie movie) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-
-            // Først tjek, om der allerede findes aktører i databasen
-            for (Actor actor : movie.getActors()) {
-                Actor existingActor = findActorByName(em, actor.getName());
-                if (existingActor != null) {
-                    actor.setId(existingActor.getId());  // Brug eksisterende aktør
-                } else {
-                    em.persist(actor);  // Gem ny aktør
-                }
-            }
-
-            // Tjek, om instruktøren allerede findes i databasen
-            Director director = movie.getDirector();
-            Director existingDirector = findDirectorByName(em, director.getName());
-            if (existingDirector != null) {
-                movie.setDirector(existingDirector);
-            } else {
-                em.persist(director);  // Gem ny instruktør
-            }
-
-            // Tjek, om genrerne allerede findes i databasen
-            for (Genre genre : movie.getGenres()) {
-                Genre existingGenre = findGenreByName(em, genre.getGenreName());
-                if (existingGenre != null) {
-                    genre.setId(existingGenre.getId());  // Brug eksisterende genre
-                } else {
-                    em.persist(genre);  // Gem ny genre
-                }
-            }
-
-            // Endelig gem filmen med alle dens relaterede entiteter
-            em.persist(movie);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            em.close();
+    @Override
+    public Optional<Movie> findByName(String title) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m WHERE LOWER(m.title) = LOWER(:name)", Movie.class);
+            query.setParameter("name", title);
+            return query.getResultStream().findFirst();
         }
-    }
-
-    // Find eksisterende skuespiller ved navn
-    private Actor findActorByName(EntityManager em, String name) {
-        TypedQuery<Actor> query = em.createQuery("SELECT a FROM Actor a WHERE a.name = :name", Actor.class);
-        query.setParameter("name", name);
-        return query.getResultStream().findFirst().orElse(null);
-    }
-
-    // Find eksisterende instruktør ved navn
-    private Director findDirectorByName(EntityManager em, String name) {
-        TypedQuery<Director> query = em.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class);
-        query.setParameter("name", name);
-        return query.getResultStream().findFirst().orElse(null);
-    }
-
-    // Find eksisterende genre ved navn
-    private Genre findGenreByName(EntityManager em, String genreName) {
-        TypedQuery<Genre> query = em.createQuery("SELECT g FROM Genre g WHERE g.genreName = :genreName", Genre.class);
-        query.setParameter("genreName", genreName);
-        return query.getResultStream().findFirst().orElse(null);
     }
 
 
