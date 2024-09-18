@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
 @Data
 @NoArgsConstructor
 @ToString
@@ -38,6 +40,7 @@ public class Movie {
             name = "movie_genre",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
+
     )
     private List<Genre> genres;
 
@@ -54,8 +57,8 @@ public class Movie {
         this.releaseDate = movieDTO.getReleaseDate();
         this.voteAverage = movieDTO.getVoteAverage();
 
-        this.genres=movieDTO.getGenres().stream().map(Genre::new).toList();
-        this.actors=movieDTO.getActors().stream().map(Actor::new).toList();
+        this.genres=movieDTO.getGenres().stream().map(Genre::new).collect(Collectors.toList());
+        this.actors=movieDTO.getActors().stream().map(Actor::new).collect(Collectors.toList());
 
         if(movieDTO.getDirector()!=null){
             this.director=new Director(movieDTO.getDirector());

@@ -25,6 +25,6 @@ public class Director {
 
 
     public Director(DirectorDTO directorDTO) {
-        this.name = name;
+        this.name = directorDTO.getName();
     }
 }

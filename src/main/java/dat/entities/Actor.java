@@ -25,7 +25,7 @@ public class Actor {
     private List<Movie> movies;
 
     public Actor(ActorDTO actorDTO) {
-        this.name = name;
+        this.name = actorDTO.getName();
     }
 
 }
