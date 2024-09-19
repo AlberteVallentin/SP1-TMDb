@@ -12,6 +12,7 @@ import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,13 +94,13 @@ class MovieDAOTest {
         m3.setReleaseDate(LocalDate.of(2023, 03, 14));
         m3.setVoteAverage(0.0);
         m3.setGenres(new HashSet<>() {{
-            add(new GenreDTO("Drama"));
-            add(new GenreDTO("War"));
-        }});
+                add(new GenreDTO("Drama"));
+                add(new GenreDTO("War"));
+            }});
         m3.setActors(new HashSet<>() {{
-            add(new ActorDTO("Actor 1"));
-            add(new ActorDTO("Actor 2"));
-        }});
+                add(new ActorDTO("Actor 1"));
+                add(new ActorDTO("Actor 2"));
+            }});
         m3.setDirector(new DirectorDTO("Director"));
 
         // Create the movie
@@ -113,6 +114,21 @@ class MovieDAOTest {
         assertNotNull(m3.getId());
 
 
+    }
+
+    @Test
+    public void findById() {
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Expected movie ID
+        Long expectedId = 1L;
+
+        // Check if the movie ID is correct
+        assertEquals(expectedId, optionalMovie.get().getId());
     }
 
 }

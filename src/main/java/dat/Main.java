@@ -40,6 +40,7 @@ public class Main {
         // Call the MovieService to create the movie
         MovieService movieService = new MovieService(emf);
         movieService.createMovie(movieDTO);
+        movieService.getMovieById(1L);
 
     }
 }

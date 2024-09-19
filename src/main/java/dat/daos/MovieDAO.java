@@ -114,7 +114,12 @@ public class MovieDAO implements IDAO<Movie> {
     public Optional<Movie> findById(Long id) {
         try (EntityManager em = emf.createEntityManager()) {
             Movie movie = em.find(Movie.class, id);  // Look up a movie by its ID
-            return movie != null ? Optional.of(movie) : Optional.empty();
+            if (movie == null) {
+                throw new JpaException("No movie found with ID: " + id);
+            }
+            return Optional.of(movie);
+        } catch (Exception e) {
+            throw new JpaException("Failed to find movie by ID", e);
         }
     }
 

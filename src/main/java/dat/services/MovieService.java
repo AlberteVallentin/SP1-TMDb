@@ -40,8 +40,15 @@ public class MovieService {
     }
 
 
-    public Optional<Movie> findMovieById(Long id) {
-        return movieDAO.findById(id);
+    public MovieDTO getMovieById(Long id) {
+        try {
+            Optional<Movie> movie = movieDAO.findById(id);
+            return movie.map(MovieDTO::new)
+                .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
+        } catch (JpaException e) {
+            // Log the exception or handle it as needed
+            throw e;
+        }
     }
 
 
