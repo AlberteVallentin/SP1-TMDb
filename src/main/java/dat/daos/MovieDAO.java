@@ -33,12 +33,11 @@ public class MovieDAO implements IDAO<Movie> {
             movie.setVoteAverage(movie.getVoteAverage());
             movie.setTitle(movie.getTitle());
 
-
             // Check if actors exist, if not persist them
             Set<Actor> actorsToAdd = new HashSet<>();
             for (Iterator<Actor> iterator = movie.getActors().iterator(); iterator.hasNext(); ) {
                 Actor actor = iterator.next();
-                Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE a.name = :name", Actor.class)
+                Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class)
                     .setParameter("name", actor.getName())
                     .getResultStream()
                     .findFirst()
@@ -54,7 +53,7 @@ public class MovieDAO implements IDAO<Movie> {
 
             // Check if director exists, if not persist them
             if (movie.getDirector() != null) {
-                Director existingDirector = em.createQuery("SELECT d FROM Director d WHERE d.name = :name", Director.class)
+                Director existingDirector = em.createQuery("SELECT d FROM Director d WHERE LOWER(d.name) = LOWER(:name)", Director.class)
                     .setParameter("name", movie.getDirector().getName())
                     .getResultStream()
                     .findFirst()
@@ -70,7 +69,7 @@ public class MovieDAO implements IDAO<Movie> {
             Set<Genre> genresToAdd = new HashSet<>();
             for (Iterator<Genre> iterator = movie.getGenres().iterator(); iterator.hasNext(); ) {
                 Genre genre = iterator.next();
-                Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE g.genreName = :genreName", Genre.class)
+                Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE LOWER(g.genreName) = LOWER(:genreName)", Genre.class)
                     .setParameter("genreName", genre.getGenreName())
                     .getResultStream()
                     .findFirst()
@@ -93,7 +92,6 @@ public class MovieDAO implements IDAO<Movie> {
             throw new RuntimeException("Error saving movie", e);  // Throw a runtime exception if needed
         }
     }
-
 
 
 

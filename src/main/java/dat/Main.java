@@ -28,8 +28,8 @@ public class Main {
         movieDTO.setEnglishTitle("A good movie");
         movieDTO.setReleaseDate(LocalDate.of(2024, 07, 14));
         movieDTO.setVoteAverage(9.3);
-        movieDTO.setGenres(Set.of(new GenreDTO("Drama"), new GenreDTO("Action"), new GenreDTO("En ny genre")));
-        movieDTO.setActors(Set.of(new ActorDTO("Alfredo"), new ActorDTO("Alberte")));
+        movieDTO.setGenres(Set.of(new GenreDTO("Drama"), new GenreDTO("Action"), new GenreDTO("en ny genre")));
+        movieDTO.setActors(Set.of(new ActorDTO("Alfredo"), new ActorDTO("anton")));
         movieDTO.setDirector(new DirectorDTO("Dennis"));
 
         // Call the MovieService to create the movie
