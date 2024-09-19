@@ -7,10 +7,10 @@ import lombok.*;
 import java.util.List;
 
 @Data
-
 @NoArgsConstructor
 @ToString
 @Entity
+
 
 public class Actor {
     @Id

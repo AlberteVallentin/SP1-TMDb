@@ -1,11 +1,12 @@
 package dat.daos;
-
 import dat.entities.Actor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.Builder;
 
 import java.util.List;
 import java.util.Optional;
+@Builder
 
 public class ActorDAO implements IDAO<Actor> {
 
@@ -78,15 +79,13 @@ public class ActorDAO implements IDAO<Actor> {
 
     @Override
     public Optional<Actor> findByName(String name) {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             // Query to find the actor by name
             List<Actor> actors = em.createQuery("SELECT a FROM Actor a WHERE a.name = :name", Actor.class)
                     .setParameter("name", name)
                     .getResultList();
+
             return actors.isEmpty() ? Optional.empty() : Optional.of(actors.get(0));
-        } finally {
-            em.close();
         }
     }
 }
