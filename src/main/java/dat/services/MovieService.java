@@ -13,6 +13,8 @@ import dat.entities.Genre;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MovieService {
     private final MovieDAO movieDAO;
@@ -66,7 +68,7 @@ public class MovieService {
 
             // Update actors
             if (movieDTO.getActors() != null) {
-                List<Actor> actors = movieDTO.getActors().stream()
+                Set<Actor> actors = movieDTO.getActors().stream()
                     .map(actorDTO -> {
                         Optional<Actor> existingActor = actorDAO.findByName(actorDTO.getName());
                         if (existingActor.isPresent()) {
@@ -77,13 +79,13 @@ public class MovieService {
                             return newActor;
                         }
                     })
-                    .toList();
+                    .collect(Collectors.toSet());
                 movie.setActors(actors);
             }
 
             // Update genres
             if (movieDTO.getGenres() != null) {
-                List<Genre> genres = movieDTO.getGenres().stream()
+                Set<Genre> genres = movieDTO.getGenres().stream()
                     .map(genreDTO -> {
                         Optional<Genre> existingGenre = genreDAO.findByName(genreDTO.getGenreName());
                         if (existingGenre.isPresent()) {
@@ -94,7 +96,7 @@ public class MovieService {
                             return newGenre;
                         }
                     })
-                    .toList();
+                    .collect(Collectors.toSet());
                 movie.setGenres(genres);
             }
 
