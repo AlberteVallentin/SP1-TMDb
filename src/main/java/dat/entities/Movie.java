@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 
@@ -27,13 +29,13 @@ public class Movie {
     @JoinTable(name = "movie_genre",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "genre_id"))
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "movie_actor",
         joinColumns = @JoinColumn(name = "movie_id"),
         inverseJoinColumns = @JoinColumn(name = "actor_id"))
-    private List<Actor> actors;
+    private Set<Actor> actors;
 
     @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "director_id")
@@ -47,11 +49,11 @@ public class Movie {
         this.genres = movieDTO.getGenres()
             .stream()
             .map(Genre::new)
-            .toList();
+            .collect(Collectors.toSet());
         this.actors = movieDTO.getActors()
             .stream()
             .map(Actor::new)
-            .toList();
+            .collect(Collectors.toSet());
         if (movieDTO.getDirector() != null) {
             this.director = new Director(movieDTO.getDirector());
         } else {

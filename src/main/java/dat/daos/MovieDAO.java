@@ -24,9 +24,9 @@ public class MovieDAO implements IDAO<Movie> {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
-            ActorDAO actorDAO = new ActorDAO(emf);
-            DirectorDAO directorDAO = new DirectorDAO(emf);
-            GenreDAO genreDAO = new GenreDAO(emf);
+//            ActorDAO actorDAO = new ActorDAO(emf);
+//            DirectorDAO directorDAO = new DirectorDAO(emf);
+//            GenreDAO genreDAO = new GenreDAO(emf);
 
             // Check and save actors
             for (Actor actor : movie.getActors()) {
@@ -113,6 +113,8 @@ public class MovieDAO implements IDAO<Movie> {
             return query.getResultStream().findFirst();
         }
     }
+
+
 
 
 }
