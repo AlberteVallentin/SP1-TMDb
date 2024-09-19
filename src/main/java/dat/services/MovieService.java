@@ -40,16 +40,21 @@ public class MovieService {
     }
 
 
+    // MovieService.java
     public MovieDTO getMovieById(Long id) {
         try {
             Optional<Movie> movie = movieDAO.findById(id);
-            return movie.map(MovieDTO::new)
+            MovieDTO movieDTO = movie.map(MovieDTO::new)
                 .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
+
+            System.out.println("The movie with ID " + id + " was found. " + movieDTO.buildMovieDetails());
+            return movieDTO;
         } catch (JpaException e) {
-            // Log the exception or handle it as needed
+            System.out.println("JpaException: " + e.getMessage());
             throw e;
         }
     }
+
 
 
     public List<Movie> getAllMovies() {

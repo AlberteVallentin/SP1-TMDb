@@ -75,6 +75,33 @@ public class MovieDTO {
 
         return movie;
     }
+
+    public String buildMovieDetails() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Movie Details:\n");
+        sb.append("Title: ").append(title).append("\n");
+        if (englishTitle != null) {
+            sb.append("English Title: ").append(englishTitle).append("\n");
+        }
+        sb.append("Release Date: ").append(releaseDate).append("\n");
+        sb.append("Vote Average: ").append(voteAverage).append("\n");
+        if (genres != null && !genres.isEmpty()) {
+            sb.append("Genres: ");
+            genres.forEach(genre -> sb.append(genre.getGenreName()).append(", "));
+            sb.setLength(sb.length() - 2); // Remove the last comma and space
+            sb.append("\n");
+        }
+        if (actors != null && !actors.isEmpty()) {
+            sb.append("Actors: ");
+            actors.forEach(actor -> sb.append(actor.getName()).append(", "));
+            sb.setLength(sb.length() - 2); // Remove the last comma and space
+            sb.append("\n");
+        }
+        if (director != null) {
+            sb.append("Director: ").append(director.getName()).append("\n");
+        }
+        return sb.toString();
+    }
 }
 
 
