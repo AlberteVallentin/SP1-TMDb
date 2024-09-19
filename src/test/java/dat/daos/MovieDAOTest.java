@@ -119,7 +119,7 @@ class MovieDAOTest {
     @Test
     public void findById() {
         // Find the first movie
-        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+        Optional<Movie> optionalMovie= movieDAO.findById(m1.getId());
 
         // Check if the movie was found
         assertTrue(optionalMovie.isPresent());
@@ -130,5 +130,8 @@ class MovieDAOTest {
         // Check if the movie ID is correct
         assertEquals(expectedId, optionalMovie.get().getId());
     }
+
+
+
 
 }

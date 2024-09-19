@@ -32,16 +32,9 @@ public class MovieDTO {
         this.voteAverage = movie.getVoteAverage();
 
         // Convert Genre, Actor, Director to DTOs
-        this.genres = movie.getGenres()
-            .stream()
-            .map(GenreDTO::new)
-            .collect(Collectors.toSet());
-        this.actors = movie.getActors()
-            .stream()
-            .map(ActorDTO::new)
-            .collect(Collectors.toSet());
-
-        this.director = new DirectorDTO(movie.getDirector());
+        this.genres = movie.getGenres() != null ? movie.getGenres().stream().map(GenreDTO::new).collect(Collectors.toSet()) : null;
+        this.actors = movie.getActors() != null ? movie.getActors().stream().map(ActorDTO::new).collect(Collectors.toSet()) : null;
+        this.director = movie.getDirector() != null ? new DirectorDTO(movie.getDirector()) : null;
     }
 
     public MovieDTO(String title, String englishTitle, LocalDate releaseDate, double voteAverage, DirectorDTO director, Set<GenreDTO> genres, Set<ActorDTO> actors) {
@@ -79,6 +72,7 @@ public class MovieDTO {
     public String buildMovieDetails() {
         StringBuilder sb = new StringBuilder();
         sb.append("Movie Details:\n");
+        sb.append("ID: ").append(id).append("\n");
         sb.append("Title: ").append(title).append("\n");
         if (englishTitle != null) {
             sb.append("English Title: ").append(englishTitle).append("\n");

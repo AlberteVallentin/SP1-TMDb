@@ -22,6 +22,7 @@ import java.util.Set;
 public class Main {
     public static void main(String[] args) {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
+        MovieService movieService = new MovieService(emf);
 
         // Create a new movieDTO
         MovieDTO movieDTO = new MovieDTO();
@@ -37,10 +38,21 @@ public class Main {
         movieDTO.setDirector(null);
 
 
-        // Call the MovieService to create the movie
-        MovieService movieService = new MovieService(emf);
+        // Create the movie in the database
         movieService.createMovie(movieDTO);
-        movieService.getMovieById(1L);
+
+
+        // Retrieve the movie by ID
+        Long movieId = 1L;
+        MovieDTO movieDTOFoundById = movieService.getMovieById(movieId);
+        System.out.println("Retrieved movie: " + movieDTOFoundById.buildMovieDetails());
+
+        // Retrieve all movies
+        Set<MovieDTO> allMovies = movieService.getAllMovies();
+        for (MovieDTO allMoviesDTO : allMovies) {
+            System.out.println(allMoviesDTO.buildMovieDetails());
+            System.out.println("--------------------");
+        }
 
     }
 }

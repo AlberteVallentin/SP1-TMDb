@@ -1,19 +1,11 @@
 package dat.services;
 
-import dat.daos.ActorDAO;
-import dat.daos.DirectorDAO;
-import dat.daos.GenreDAO;
 import dat.daos.MovieDAO;
 import dat.dtos.MovieDTO;
-import dat.entities.Director;
 import dat.entities.Movie;
-import dat.entities.Actor;
-import dat.entities.Genre;
 
 import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +14,6 @@ import java.util.stream.Collectors;
 
 public class MovieService {
     private final MovieDAO movieDAO;
-    private static final Logger logger = LoggerFactory.getLogger(MovieService.class);
 
     public MovieService(EntityManagerFactory emf) {
         this.movieDAO = new MovieDAO(emf);
@@ -39,27 +30,29 @@ public class MovieService {
         }
     }
 
-
-    // MovieService.java
     public MovieDTO getMovieById(Long id) {
         try {
             Optional<Movie> movie = movieDAO.findById(id);
             MovieDTO movieDTO = movie.map(MovieDTO::new)
                 .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
-
-            System.out.println("The movie with ID " + id + " was found. " + movieDTO.buildMovieDetails());
+            System.out.println("The movie with ID " + id + " was found. ");
             return movieDTO;
         } catch (JpaException e) {
             System.out.println("JpaException: " + e.getMessage());
             throw e;
         }
+
+    }
+
+    public Set<MovieDTO> getAllMovies() {
+        return movieDAO.findAll().stream()
+            .map(MovieDTO::new)
+            .collect(Collectors.toSet());
     }
 
 
 
-    public List<Movie> getAllMovies() {
-        return movieDAO.findAll();
-    }
+
 
 
 //    public void updateMovie(MovieDTO movieDTO) {
