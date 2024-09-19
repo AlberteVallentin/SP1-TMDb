@@ -24,8 +24,7 @@ public class MovieDAO implements IDAO<Movie> {
 
     @Override
     public void create(Movie movie) {
-        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
             // Title and Release Date are required, so we validate their presence

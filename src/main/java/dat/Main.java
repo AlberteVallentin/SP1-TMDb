@@ -25,11 +25,14 @@ public class Main {
 
         // Create a new movieDTO
         MovieDTO movieDTO = new MovieDTO();
-        movieDTO.setTitle("null");
+        movieDTO.setTitle("titel");
         movieDTO.setEnglishTitle(null);
         movieDTO.setReleaseDate(LocalDate.of(2024, 07, 14));
         movieDTO.setVoteAverage(0.0);
-        movieDTO.setGenres(null);
+        movieDTO.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
         movieDTO.setActors(null);
         movieDTO.setDirector(null);
 
