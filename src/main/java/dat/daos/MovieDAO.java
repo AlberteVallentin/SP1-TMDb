@@ -89,7 +89,8 @@ public class MovieDAO implements IDAO<Movie> {
 
             em.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Print the exception if anything goes wrong
+            throw new RuntimeException("Error saving movie", e);  // Throw a runtime exception if needed
         }
     }
 

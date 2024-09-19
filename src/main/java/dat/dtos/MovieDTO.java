@@ -1,19 +1,15 @@
+// MovieDTO.java
 package dat.dtos;
 
+import dat.entities.Movie;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import dat.entities.Director;
-import dat.entities.Movie;
-import dat.entities.Actor;
-import dat.entities.Genre;
-import lombok.*;
 
 @Data
 @NoArgsConstructor
-
 public class MovieDTO {
     private Long id;
     private String title;
@@ -21,8 +17,8 @@ public class MovieDTO {
     private LocalDate releaseDate;
     private double voteAverage;
 
-    private List<GenreDTO> genres;
-    private List<ActorDTO> actors;
+    private Set<GenreDTO> genres;
+    private Set<ActorDTO> actors;
     private DirectorDTO director;
 
     // Constructor to convert Movie entity to MovieDTO
@@ -37,14 +33,13 @@ public class MovieDTO {
         this.genres = movie.getGenres()
             .stream()
             .map(GenreDTO::new)
-            .toList();
+            .collect(Collectors.toSet());
         this.actors = movie.getActors()
             .stream()
             .map(ActorDTO::new)
-            .toList();
+            .collect(Collectors.toSet());
 
-        this.director = new DirectorDTO
-            (movie.getDirector());
+        this.director = new DirectorDTO(movie.getDirector());
     }
 
     // Method to convert MovieDTO to Movie entity
@@ -57,17 +52,18 @@ public class MovieDTO {
         movie.setVoteAverage(this.voteAverage);
 
         if (this.genres != null) {
-            movie.setGenres(this.genres.stream().map(Genre::new).collect(Collectors.toSet()));
+            movie.setGenres(this.genres.stream().map(GenreDTO::toEntity).collect(Collectors.toSet()));
         }
         if (this.actors != null) {
-            movie.setActors(this.actors.stream().map(Actor::new).collect(Collectors.toSet()));
+            movie.setActors(this.actors.stream().map(ActorDTO::toEntity).collect(Collectors.toSet()));
         }
         if (this.director != null) {
-            movie.setDirector(new Director(this.director));
+            movie.setDirector(this.director.toEntity());
         }
 
         return movie;
     }
 }
+
 
 

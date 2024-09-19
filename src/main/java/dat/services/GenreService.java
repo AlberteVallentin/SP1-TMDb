@@ -17,7 +17,7 @@ public class GenreService {
     }
 
     public void createGenre(GenreDTO genreDTO) {
-        Genre genre = new Genre(genreDTO);
+        Genre genre = genreDTO.toEntity();
         genreDAO.create(genre);
     }
 
@@ -30,7 +30,7 @@ public class GenreService {
     }
 
     public void updateGenre(GenreDTO genreDTO) {
-        Genre genre = new Genre(genreDTO);
+        Genre genre = new Genre();
         Optional<Genre> optionalGenre = genreDAO.findById(genreDTO.getId());
         if (optionalGenre.isPresent()) {
             genre = optionalGenre.get();

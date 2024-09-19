@@ -16,6 +16,10 @@ public class ActorDTO {
         this.name = actor.getName();
     }
 
+    public ActorDTO(String name) {
+        this.name = name;
+    }
+
     // Method to convert ActorDTO to Actor entity
     public Actor toEntity() {
         Actor actor = new Actor();

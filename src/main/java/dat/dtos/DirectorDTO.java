@@ -23,4 +23,8 @@ public class DirectorDTO {
         director.setName(this.name);
         return director;
     }
+
+    public DirectorDTO(String name) {
+        this.name = name;
+    }
 }
