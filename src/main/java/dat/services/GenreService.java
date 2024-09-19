@@ -25,9 +25,6 @@ public class GenreService {
         return genreDAO.findById(id);
     }
 
-    public List<Genre> getAllGenres() {
-        return genreDAO.findAll();
-    }
 
     public void updateGenre(GenreDTO genreDTO) {
         Genre genre = new Genre();

@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class Main {
         System.out.println("Retrieved movie: " + movieDTOFoundById.buildMovieDetails());
 
         // Retrieve all movies
-        Set<MovieDTO> allMovies = movieService.getAllMovies();
+        List<MovieDTO> allMovies = movieService.getAllMovies();
         for (MovieDTO allMoviesDTO : allMovies) {
             System.out.println(allMoviesDTO.buildMovieDetails());
             System.out.println("--------------------");

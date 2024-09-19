@@ -44,10 +44,10 @@ public class MovieService {
 
     }
 
-    public Set<MovieDTO> getAllMovies() {
+    public List<MovieDTO> getAllMovies() {
         return movieDAO.findAll().stream()
             .map(MovieDTO::new)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
     }
 
 

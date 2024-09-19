@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import java.util.ArrayList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MovieDAOTest {
@@ -119,7 +121,7 @@ class MovieDAOTest {
     @Test
     public void findById() {
         // Find the first movie
-        Optional<Movie> optionalMovie= movieDAO.findById(m1.getId());
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
 
         // Check if the movie was found
         assertTrue(optionalMovie.isPresent());
@@ -129,6 +131,19 @@ class MovieDAOTest {
 
         // Check if the movie ID is correct
         assertEquals(expectedId, optionalMovie.get().getId());
+    }
+
+    @Test
+    public void findAll() {
+        // Find all movies
+        List<Movie> movies = movieDAO.findAll();
+
+        // Check if all movies were found
+        assertEquals(2, movies.size());
+
+        // Check if the movie titles are correct
+        assertEquals("Test 1", movies.get(0).getTitle());
+        assertEquals("Test 2", movies.get(1).getTitle());
     }
 
 
