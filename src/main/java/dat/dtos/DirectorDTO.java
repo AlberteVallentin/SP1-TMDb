@@ -14,4 +14,5 @@ public class DirectorDTO {
         this.id = director.getId();
         this.name = director.getName();
     }
+
 }
