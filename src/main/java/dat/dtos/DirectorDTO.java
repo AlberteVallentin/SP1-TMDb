@@ -15,4 +15,12 @@ public class DirectorDTO {
         this.id = director.getId();
         this.name = director.getName();
     }
+
+    // Method to convert DirectorDTO to Director entity
+    public Director toEntity() {
+        Director director = new Director();
+        director.setId(this.id);
+        director.setName(this.name);
+        return director;
+    }
 }
