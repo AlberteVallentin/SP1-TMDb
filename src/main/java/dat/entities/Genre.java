@@ -25,6 +25,8 @@ public class Genre {
     private List<Movie> movies;
 
     public Genre(GenreDTO genreDTO) {
+        this.id = genreDTO.getId();
         this.genreName = genreDTO.getGenreName();
     }
+
 }

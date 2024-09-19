@@ -24,7 +24,12 @@ public class Director {
     private List<Movie> movies;
 
 
-    public Director(DirectorDTO directorDTO) {
+    public Director(String name) {
+        this.name = name;
+    }
+
+   public Director (DirectorDTO directorDTO) {
+        this.id = directorDTO.getId();
         this.name = directorDTO.getName();
     }
 }

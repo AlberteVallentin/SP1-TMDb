@@ -17,11 +17,19 @@ public class ActorDAO implements IDAO<Actor> {
 
     @Override
     public void create(Actor entity) {
+        try (EntityManager em = emf.createEntityManager()) {
+            // Check if the actor already exists
+            Optional<Actor> existingActor = findByName(entity.getName());
+            if (existingActor.isPresent()) {
+                System.out.println("Actor with the name '" + entity.getName() + "' already exists.");
+                return;  // Avoid inserting a duplicate actor
+            }
 
-        try(EntityManager em= emf.createEntityManager()){
             em.getTransaction().begin();
-            em.persist(entity);
+            em.persist(entity);  // Persist the new actor
             em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -70,11 +78,15 @@ public class ActorDAO implements IDAO<Actor> {
 
     @Override
     public Optional<Actor> findByName(String name) {
-        try(EntityManager em= emf.createEntityManager()){
-            Actor actor= em.createQuery("SELECT a FROM Actor a WHERE a.name= :name", Actor.class)
+        EntityManager em = emf.createEntityManager();
+        try {
+            // Query to find the actor by name
+            List<Actor> actors = em.createQuery("SELECT a FROM Actor a WHERE a.name = :name", Actor.class)
                     .setParameter("name", name)
-                    .getSingleResult();
-            return actor!=null? Optional.of(actor): Optional.empty();
+                    .getResultList();
+            return actors.isEmpty() ? Optional.empty() : Optional.of(actors.get(0));
+        } finally {
+            em.close();
         }
     }
 }

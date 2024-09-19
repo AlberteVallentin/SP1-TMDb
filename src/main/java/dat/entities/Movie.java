@@ -50,24 +50,24 @@ public class Movie {
     private Director director;
 
 
+    public Movie(String title, String englishTitle, LocalDate releaseDate, double voteAverage, List<Actor> actors, List<Genre> genres, Director director) {
+        this.title = title;
+        this.englishTitle = englishTitle;
+        this.releaseDate = releaseDate;
+        this.voteAverage = voteAverage;
+        this.actors = actors;
+        this.genres = genres;
+        this.director = director;
+    }
 
-    public Movie(MovieDTO movieDTO) {
+    public Movie (MovieDTO movieDTO) {
+        this.id = movieDTO.getId();
         this.title = movieDTO.getTitle();
         this.englishTitle = movieDTO.getEnglishTitle();
         this.releaseDate = movieDTO.getReleaseDate();
         this.voteAverage = movieDTO.getVoteAverage();
-
-        this.genres=movieDTO.getGenres().stream().map(Genre::new).collect(Collectors.toList());
-        this.actors=movieDTO.getActors().stream().map(Actor::new).collect(Collectors.toList());
-
-        if(movieDTO.getDirector()!=null){
-            this.director=new Director(movieDTO.getDirector());
-        }else {
-            this.director=null;
-        }
-
+        this.actors = movieDTO.getActors().stream().map(Actor::new).collect(Collectors.toList());
+        this.genres = movieDTO.getGenres().stream().map(Genre::new).collect(Collectors.toList());
+        this.director = new Director(movieDTO.getDirector());
     }
-
-
-
 }

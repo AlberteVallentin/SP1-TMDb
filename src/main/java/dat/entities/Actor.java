@@ -24,8 +24,12 @@ public class Actor {
     @ManyToMany(mappedBy = "actors")
     private List<Movie> movies;
 
-    public Actor(ActorDTO actorDTO) {
-        this.name = actorDTO.getName();
+    public Actor(String name) {
+        this.name = name;
     }
 
+    public Actor (ActorDTO actorDTO) {
+        this.id = actorDTO.getId();
+        this.name = actorDTO.getName();
+    }
 }

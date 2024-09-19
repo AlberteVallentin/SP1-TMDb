@@ -31,12 +31,9 @@ public class GenreDAO implements IDAO<Genre> {
     public Optional<Genre> findById(Long id) {
         try (EntityManager em = emf.createEntityManager()) {
 
-            Genre genre = em.find(Genre.class, id);
-
-            return genre != null ? Optional.of(genre) : Optional.empty();
-
-        }
-
+                Genre genre = em.find(Genre.class, id); // Ensure you're using the correct entity and ID type
+                return Optional.ofNullable(genre); // Return an Optional to avoid null pointers
+            }
     }
 
     @Override

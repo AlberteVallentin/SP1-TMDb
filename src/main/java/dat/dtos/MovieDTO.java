@@ -3,10 +3,9 @@ package dat.dtos;
 import dat.entities.Movie;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Data
 @NoArgsConstructor
@@ -36,8 +35,11 @@ public class MovieDTO {
     }
 
 
+    }
 
 
 
 
-}
+
+
+
