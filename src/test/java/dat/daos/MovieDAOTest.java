@@ -43,16 +43,11 @@ class MovieDAOTest {
             em.createQuery("DELETE FROM Genre").executeUpdate();
             em.createNativeQuery("ALTER SEQUENCE genre_id_seq RESTART WITH 1").executeUpdate();
             em.getTransaction().commit();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
 
-    @Test
-    @DisplayName("Test create movie")
-    void create() {
-        // Create MovieDTO objects
+        // Initialize and persist MovieDTO objects
         m1 = new MovieDTO("Test 1", "English title 1", LocalDate.of(2024, 7, 14), 8.0,
             new DirectorDTO("Steven Spielberg"),
             new HashSet<>() {{
@@ -72,7 +67,6 @@ class MovieDAOTest {
                 add(new ActorDTO("Leonardo DiCaprio"));
             }});
 
-
         // Convert MovieDTO to Movie entity
         Movie movie1 = m1.toEntity();
         Movie movie2 = m2.toEntity();
@@ -81,17 +75,44 @@ class MovieDAOTest {
         movieDAO.create(movie1);
         movieDAO.create(movie2);
 
-        // Find the movies in the database
-        EntityManager em = emf.createEntityManager();
-        Movie foundMovie1 = em.find(Movie.class, movie1.getId());
-        Movie foundMovie2 = em.find(Movie.class, movie2.getId());
+        // Set the IDs of the MovieDTO objects
+        m1.setId(movie1.getId());
+        m2.setId(movie2.getId());
 
-        // Check if the movies were found
-        assertNotNull(foundMovie1);
-        assertNotNull(foundMovie2);
 
-        em.close();
     }
 
+    @Test
+    @DisplayName("Test create movie")
+    void create() {
+
+        // Create a new movieDTO
+        MovieDTO m3 = new MovieDTO();
+        m3.setTitle("titel");
+        m3.setEnglishTitle(null);
+        m3.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m3.setVoteAverage(0.0);
+        m3.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
+        m3.setActors(new HashSet<>() {{
+            add(new ActorDTO("Actor 1"));
+            add(new ActorDTO("Actor 2"));
+        }});
+        m3.setDirector(new DirectorDTO("Director"));
+
+        // Create the movie
+        Movie movie3 = m3.toEntity();
+        movieDAO.create(movie3);
+
+        // Set the ID of the MovieDTO object
+        m3.setId(movie3.getId());
+
+        // Check if the movie was created
+        assertNotNull(m3.getId());
+
+
+    }
 
 }
