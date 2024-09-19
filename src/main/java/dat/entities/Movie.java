@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @ToString
 @Entity
-
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +40,8 @@ public class Movie {
     @JoinColumn(name = "director_id")
     private Director director;
 
-//    public Movie(MovieDTO movieDTO) {
+
+    //    public Movie(MovieDTO movieDTO) {
 //        this.title = movieDTO.getTitle();
 //        this.englishTitle = movieDTO.getEnglishTitle();
 //        this.releaseDate = movieDTO.getReleaseDate();

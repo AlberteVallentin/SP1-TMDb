@@ -6,6 +6,7 @@ import dat.entities.Actor;
 import dat.entities.Director;
 import dat.entities.Genre;
 import dat.entities.Movie;
+import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -27,31 +28,39 @@ public class MovieDAO implements IDAO<Movie> {
         try (var em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
-            // Set other fields
-            movie.setEnglishTitle(movie.getEnglishTitle());
-            movie.setReleaseDate(movie.getReleaseDate());
-            movie.setVoteAverage(movie.getVoteAverage());
-            movie.setTitle(movie.getTitle());
-
-            // Check if actors exist, if not persist them
-            Set<Actor> actorsToAdd = new HashSet<>();
-            for (Iterator<Actor> iterator = movie.getActors().iterator(); iterator.hasNext(); ) {
-                Actor actor = iterator.next();
-                Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class)
-                    .setParameter("name", actor.getName())
-                    .getResultStream()
-                    .findFirst()
-                    .orElse(null);
-                if (existingActor == null) {
-                    em.persist(actor);
-                } else {
-                    iterator.remove();
-                    actorsToAdd.add(existingActor);
-                }
+            // Title and Release Date are required, so we validate their presence
+            if (movie.getTitle() == null || movie.getReleaseDate() == null) {
+                throw new JpaException("Title and Release Date are required fields and cannot be null.");
             }
-            movie.getActors().addAll(actorsToAdd);
 
-            // Check if director exists, if not persist them
+            // Set English title if it's not null or empty
+            movie.setEnglishTitle(movie.getEnglishTitle() != null && !movie.getEnglishTitle().isEmpty() ? movie.getEnglishTitle() : null);
+
+            // Set VoteAverage (optional, can be null)
+            movie.setVoteAverage(movie.getVoteAverage());
+
+            // Check if actors exist, if not persist them (can be null)
+            Set<Actor> actorsToAdd = new HashSet<>();
+            if (movie.getActors() != null) {
+                for (Actor actor : movie.getActors()) {
+                    Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class)
+                        .setParameter("name", actor.getName())
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+                    if (existingActor == null) {
+                        em.persist(actor); // Persist new actor
+                    } else {
+                        actorsToAdd.add(existingActor); // Use existing actor
+                    }
+                }
+                movie.getActors().clear();
+                movie.getActors().addAll(actorsToAdd); // Add all existing actors back to the movie
+            } else {
+                movie.setActors(null); // Actors can be null
+            }
+
+            // Check if director exists, if not persist them (can be null)
             if (movie.getDirector() != null) {
                 Director existingDirector = em.createQuery("SELECT d FROM Director d WHERE LOWER(d.name) = LOWER(:name)", Director.class)
                     .setParameter("name", movie.getDirector().getName())
@@ -59,37 +68,41 @@ public class MovieDAO implements IDAO<Movie> {
                     .findFirst()
                     .orElse(null);
                 if (existingDirector == null) {
-                    em.persist(movie.getDirector());
+                    em.persist(movie.getDirector()); // Persist new director
                 } else {
-                    movie.setDirector(existingDirector);
+                    movie.setDirector(existingDirector); // Use existing director
                 }
+            } else {
+                movie.setDirector(null); // Director can be null
             }
 
-            // Check if genres exist, if not persist them
+            // Check if genres exist, if not persist them (can be null)
             Set<Genre> genresToAdd = new HashSet<>();
-            for (Iterator<Genre> iterator = movie.getGenres().iterator(); iterator.hasNext(); ) {
-                Genre genre = iterator.next();
-                Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE LOWER(g.genreName) = LOWER(:genreName)", Genre.class)
-                    .setParameter("genreName", genre.getGenreName())
-                    .getResultStream()
-                    .findFirst()
-                    .orElse(null);
-                if (existingGenre == null) {
-                    em.persist(genre);
-                } else {
-                    iterator.remove();
-                    genresToAdd.add(existingGenre);
+            if (movie.getGenres() != null) {
+                for (Genre genre : movie.getGenres()) {
+                    Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE LOWER(g.genreName) = LOWER(:genreName)", Genre.class)
+                        .setParameter("genreName", genre.getGenreName())
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+                    if (existingGenre == null) {
+                        em.persist(genre); // Persist new genre
+                    } else {
+                        genresToAdd.add(existingGenre); // Use existing genre
+                    }
                 }
+                movie.getGenres().clear();
+                movie.getGenres().addAll(genresToAdd); // Add all existing genres back to the movie
+            } else {
+                movie.setGenres(null); // Genres can be null
             }
-            movie.getGenres().addAll(genresToAdd);
 
-            // Save the movie
+            // Persist the movie
             em.persist(movie);
 
             em.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();  // Print the exception if anything goes wrong
-            throw new RuntimeException("Error saving movie", e);  // Throw a runtime exception if needed
+            throw new JpaException("Failed to create movie in the database", e);
         }
     }
 
@@ -97,57 +110,6 @@ public class MovieDAO implements IDAO<Movie> {
 
 
 
-
-
-
-//    @Override
-//    public void create(Movie movie) {
-//        try (EntityManager em = emf.createEntityManager()) {
-//            em.getTransaction().begin();
-//
-////            ActorDAO actorDAO = new ActorDAO(emf);
-////            DirectorDAO directorDAO = new DirectorDAO(emf);
-////            GenreDAO genreDAO = new GenreDAO(emf);
-//
-//            // Check and save actors
-//            for (Actor actor : movie.getActors()) {
-//                Optional<Actor> existingActor = actorDAO.findByName(actor.getName());
-//                if (existingActor.isPresent()) {
-//                    actor.setId(existingActor.get().getId());
-//                } else {
-//                    em.persist(actor);
-//                }
-//            }
-//
-//            // Check and save director
-//            Director director = movie.getDirector();
-//            if (director != null) {
-//               Optional<Director> existingDirector = directorDAO.findByName(director.getName());
-//                if (existingDirector.isPresent()) {
-//                    director.setId(existingDirector.get().getId());
-//                } else {
-//                    em.persist(director);
-//                }
-//            }
-//
-//            // Check and save genres
-//            for (Genre genre : movie.getGenres()) {
-//                Optional<Genre> existingGenre = genreDAO.findByName(genre.getGenreName());
-//                if (existingGenre.isPresent()) {
-//                    genre.setId(existingGenre.get().getId());
-//                } else {
-//                    em.persist(genre);
-//                }
-//            }
-//
-//            // Save the movie
-//            em.persist(movie);
-//            em.getTransaction().commit();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//    }
 
     @Override
     public Optional<Movie> findById(Long id) {

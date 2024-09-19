@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class Main {
@@ -24,13 +25,14 @@ public class Main {
 
         // Create a new movieDTO
         MovieDTO movieDTO = new MovieDTO();
-        movieDTO.setTitle("En god film");
-        movieDTO.setEnglishTitle("A good movie");
+        movieDTO.setTitle("null");
+        movieDTO.setEnglishTitle(null);
         movieDTO.setReleaseDate(LocalDate.of(2024, 07, 14));
-        movieDTO.setVoteAverage(9.3);
-        movieDTO.setGenres(Set.of(new GenreDTO("Drama"), new GenreDTO("Action"), new GenreDTO("en ny genre")));
-        movieDTO.setActors(Set.of(new ActorDTO("Alfredo"), new ActorDTO("anton")));
-        movieDTO.setDirector(new DirectorDTO("Dennis"));
+        movieDTO.setVoteAverage(0.0);
+        movieDTO.setGenres(null);
+        movieDTO.setActors(null);
+        movieDTO.setDirector(null);
+
 
         // Call the MovieService to create the movie
         MovieService movieService = new MovieService(emf);

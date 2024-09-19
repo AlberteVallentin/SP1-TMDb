@@ -5,6 +5,8 @@ import dat.entities.Movie;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,16 @@ public class MovieDTO {
             .collect(Collectors.toSet());
 
         this.director = new DirectorDTO(movie.getDirector());
+    }
+
+    public MovieDTO(String title, String englishTitle, LocalDate releaseDate, double voteAverage, DirectorDTO director, Set<GenreDTO> genres, Set<ActorDTO> actors) {
+        this.title = title;
+        this.englishTitle = englishTitle;
+        this.releaseDate = releaseDate;
+        this.voteAverage = voteAverage;
+        this.director = director;
+        this.genres = genres;
+        this.actors = actors;
     }
 
     // Method to convert MovieDTO to Movie entity

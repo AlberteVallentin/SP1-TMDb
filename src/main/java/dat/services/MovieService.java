@@ -10,7 +10,11 @@ import dat.entities.Movie;
 import dat.entities.Actor;
 import dat.entities.Genre;
 
+import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,21 +22,21 @@ import java.util.stream.Collectors;
 
 public class MovieService {
     private final MovieDAO movieDAO;
-    private final ActorDAO actorDAO;
-    private final GenreDAO genreDAO;
-    private final DirectorDAO directorDAO;
+    private static final Logger logger = LoggerFactory.getLogger(MovieService.class);
 
     public MovieService(EntityManagerFactory emf) {
         this.movieDAO = new MovieDAO(emf);
-        this.actorDAO = new ActorDAO(emf);
-        this.genreDAO = new GenreDAO(emf);
-        this.directorDAO = new DirectorDAO(emf);
     }
 
 
     public void createMovie(MovieDTO movieDTO) {
-        Movie movie = movieDTO.toEntity();
-        movieDAO.create(movie);
+        try {
+            Movie movie = movieDTO.toEntity();
+            movieDAO.create(movie);
+        } catch (JpaException e) {
+            System.out.println("Failed to create movie: " + e.getMessage());
+            throw e;
+        }
     }
 
 
