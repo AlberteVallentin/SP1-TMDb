@@ -134,7 +134,7 @@ class MovieDAOTest {
     }
 
     @Test
-    public void findAll() {
+    void findAll() {
         // Find all movies
         List<Movie> movies = movieDAO.findAll();
 
@@ -144,6 +144,43 @@ class MovieDAOTest {
         // Check if the movie titles are correct
         assertEquals("Test 1", movies.get(0).getTitle());
         assertEquals("Test 2", movies.get(1).getTitle());
+    }
+
+    @Test
+    void update() {
+        // Update the first movie
+        m1.setTitle("Updated title");
+        m1.setEnglishTitle("Updated English title");
+        m1.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m1.setVoteAverage(9.0);
+        m1.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Action"));
+            add(new GenreDTO("Adventure"));
+        }});
+        m1.setActors(new HashSet<>() {{
+            add(new ActorDTO("New actor"));
+            add(new ActorDTO("New actor 2"));
+        }});
+        m1.setDirector(new DirectorDTO("Updated director"));
+
+        // Update the movie
+        movieDAO.update(m1.toEntity());
+
+        // Find the updated movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Check if the movie was updated
+        assertEquals("Updated title", optionalMovie.get().getTitle());
+        assertEquals("Updated English title", optionalMovie.get().getEnglishTitle());
+        assertEquals(LocalDate.of(2023, 03, 14), optionalMovie.get().getReleaseDate());
+        assertEquals(9.0, optionalMovie.get().getVoteAverage());
+        assertEquals(2, optionalMovie.get().getGenres().size());
+        assertEquals(2, optionalMovie.get().getActors().size());
+        assertEquals("Updated director", optionalMovie.get().getDirector().getName());
+        
     }
 
 

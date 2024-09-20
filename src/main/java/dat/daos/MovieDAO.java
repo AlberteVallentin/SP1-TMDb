@@ -106,10 +106,6 @@ public class MovieDAO implements IDAO<Movie> {
     }
 
 
-
-
-
-
     @Override
     public Optional<Movie> findById(Long id) {
         try (EntityManager em = emf.createEntityManager()) {
@@ -127,116 +123,93 @@ public class MovieDAO implements IDAO<Movie> {
     }
 
     @Override
-    public void update(Movie movie) {
+    public Optional<Movie> update(Movie movie) {
         try (EntityManager em = emf.createEntityManager()) {
-            // Check if the movie exists
-            Movie existingMovie = em.find(Movie.class, movie.getId());
+            em.getTransaction().begin();
 
-            // Update the fields if present
-            if (existingMovie != null) {
-                em.getTransaction().begin();
-                existingMovie.setTitle(movie.getTitle());
-                existingMovie.setEnglishTitle(movie.getEnglishTitle());
-                existingMovie.setReleaseDate(movie.getReleaseDate());
-                existingMovie.setVoteAverage(movie.getVoteAverage());
-                existingMovie.setActors(movie.getActors());
-                existingMovie.setDirector(movie.getDirector());
-                existingMovie.setGenres(movie.getGenres());
-                em.getTransaction().commit();
-            } else {
-                throw new JpaException("Movie with ID " + movie.getId() + " not found.");
+            // Find the existing movie in the database
+            Movie existingMovie = em.find(Movie.class, movie.getId());
+            if (existingMovie == null) {
+                return Optional.empty(); // Return empty Optional if movie not found
             }
 
+            // Update fields
+            if (movie.getTitle() == null || movie.getReleaseDate() == null) {
+                throw new JpaException("Title and Release Date are required fields and cannot be null.");
+            }
+            existingMovie.setTitle(movie.getTitle());
+            existingMovie.setReleaseDate(movie.getReleaseDate());
+            existingMovie.setEnglishTitle(movie.getEnglishTitle() != null && !movie.getEnglishTitle().isEmpty() ? movie.getEnglishTitle() : null);
+            existingMovie.setVoteAverage(movie.getVoteAverage());
 
+            // Update actors
+            Set<Actor> actorsToAdd = new HashSet<>();
+            if (movie.getActors() != null) {
+                for (Actor actor : movie.getActors()) {
+                    Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE LOWER(a.name) = LOWER(:name)", Actor.class)
+                        .setParameter("name", actor.getName())
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+                    if (existingActor == null) {
+                        em.persist(actor); // Persist new actor
+                        actorsToAdd.add(actor);
+                    } else {
+                        actorsToAdd.add(existingActor); // Use existing actor
+                    }
+                }
+                existingMovie.getActors().clear();
+                existingMovie.getActors().addAll(actorsToAdd); // Add all existing actors back to the movie
+            } else {
+                existingMovie.setActors(null); // Actors can be null
+            }
 
+            // Update director
+            if (movie.getDirector() != null) {
+                Director existingDirector = em.createQuery("SELECT d FROM Director d WHERE LOWER(d.name) = LOWER(:name)", Director.class)
+                    .setParameter("name", movie.getDirector().getName())
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+                if (existingDirector == null) {
+                    em.persist(movie.getDirector()); // Persist new director
+                    existingMovie.setDirector(movie.getDirector());
+                } else {
+                    existingMovie.setDirector(existingDirector); // Use existing director
+                }
+            } else {
+                existingMovie.setDirector(null); // Director can be null
+            }
 
+            // Update genres
+            Set<Genre> genresToAdd = new HashSet<>();
+            if (movie.getGenres() != null) {
+                for (Genre genre : movie.getGenres()) {
+                    Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE LOWER(g.genreName) = LOWER(:genreName)", Genre.class)
+                        .setParameter("genreName", genre.getGenreName())
+                        .getResultStream()
+                        .findFirst()
+                        .orElse(null);
+                    if (existingGenre == null) {
+                        em.persist(genre); // Persist new genre
+                        genresToAdd.add(genre);
+                    } else {
+                        genresToAdd.add(existingGenre); // Use existing genre
+                    }
+                }
+                existingMovie.getGenres().clear();
+                existingMovie.getGenres().addAll(genresToAdd); // Add all existing genres back to the movie
+            } else {
+                existingMovie.setGenres(null); // Genres can be null
+            }
 
+            // Merge the updated movie
+            em.merge(existingMovie);
 
-            //    public void updateMovie(MovieDTO movieDTO) {
-//        Optional<Movie> optionalMovie = movieDAO.findById(movieDTO.getId());
-//
-//        if (optionalMovie.isPresent()) {
-//            Movie movie = optionalMovie.get();
-//
-//            // Update fields if present in the DTO
-//            if (movieDTO.getTitle() != null) {
-//                movie.setTitle(movieDTO.getTitle());
-//            }
-//            if (movieDTO.getEnglishTitle() != null) {
-//                movie.setEnglishTitle(movieDTO.getEnglishTitle());
-//            }
-//            if (movieDTO.getReleaseDate() != null) {
-//                movie.setReleaseDate(movieDTO.getReleaseDate());
-//            }
-//            if (movieDTO.getVoteAverage() != 0.0) {
-//                movie.setVoteAverage(movieDTO.getVoteAverage());
-//            }
-//
-//            // Update actors
-//            if (movieDTO.getActors() != null) {
-//                Set<Actor> actors = movieDTO.getActors().stream()
-//                    .map(actorDTO -> {
-//                        Optional<Actor> existingActor = actorDAO.findByName(actorDTO.getName());
-//                        if (existingActor.isPresent()) {
-//                            return existingActor.get();  // Use the existing actor
-//                        } else {
-//                            Actor newActor = new Actor(actorDTO);  // Create new actor
-//                            actorDAO.create(newActor);  // Persist new actor
-//                            return newActor;
-//                        }
-//                    })
-//                    .collect(Collectors.toSet());
-//                movie.setActors(actors);
-//            }
-//
-//            // Update genres
-//            if (movieDTO.getGenres() != null) {
-//                Set<Genre> genres = movieDTO.getGenres().stream()
-//                    .map(genreDTO -> {
-//                        Optional<Genre> existingGenre = genreDAO.findByName(genreDTO.getGenreName());
-//                        if (existingGenre.isPresent()) {
-//                            return existingGenre.get();  // Use the existing genre
-//                        } else {
-//                            Genre newGenre = new Genre(genreDTO);  // Create new genre
-//                            genreDAO.create(newGenre);  // Persist new genre
-//                            return newGenre;
-//                        }
-//                    })
-//                    .collect(Collectors.toSet());
-//                movie.setGenres(genres);
-//            }
-//
-//            // Update director
-//            if (movieDTO.getDirector() != null) {
-//                Optional<Director> existingDirector = directorDAO.findByName(movieDTO.getDirector().getName());
-//                if (existingDirector.isPresent()) {
-//                    movie.setDirector(existingDirector.get());  // Use existing director
-//                } else {
-//                    Director newDirector = new Director(movieDTO.getDirector());  // Create new director
-//                    directorDAO.create(newDirector);  // Persist new director
-//                    movie.setDirector(newDirector);
-//                }
-//            }
-//
-//            // Update the movie entity in the database
-//            movieDAO.update(movie);
-//        } else {
-//            throw new IllegalArgumentException("Movie with ID " + movieDTO.getId() + " not found.");
-//        }
-//    }
-
-
-
-
-
-
-
-
-
-
-            em.getTransaction().begin();
-            em.merge(movie);
             em.getTransaction().commit();
+            return Optional.of(existingMovie); // Return the updated movie wrapped in an Optional
+        } catch (Exception e) {
+            throw new JpaException("Failed to update movie in the database", e);
         }
     }
 

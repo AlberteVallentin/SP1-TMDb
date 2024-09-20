@@ -45,15 +45,10 @@ public class GenreDAO implements IDAO<Genre> {
     }
 
     @Override
-    public void update(Genre entity) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            em.merge(entity);
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Optional<Genre> update(Genre entity) {
+        return Optional.empty();
     }
+
 
     @Override
     public void delete(Long id) {
