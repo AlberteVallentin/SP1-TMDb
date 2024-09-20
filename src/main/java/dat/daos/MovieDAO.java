@@ -129,6 +129,111 @@ public class MovieDAO implements IDAO<Movie> {
     @Override
     public void update(Movie movie) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Check if the movie exists
+            Movie existingMovie = em.find(Movie.class, movie.getId());
+
+            // Update the fields if present
+            if (existingMovie != null) {
+                em.getTransaction().begin();
+                existingMovie.setTitle(movie.getTitle());
+                existingMovie.setEnglishTitle(movie.getEnglishTitle());
+                existingMovie.setReleaseDate(movie.getReleaseDate());
+                existingMovie.setVoteAverage(movie.getVoteAverage());
+                existingMovie.setActors(movie.getActors());
+                existingMovie.setDirector(movie.getDirector());
+                existingMovie.setGenres(movie.getGenres());
+                em.getTransaction().commit();
+            } else {
+                throw new JpaException("Movie with ID " + movie.getId() + " not found.");
+            }
+
+
+
+
+
+
+            //    public void updateMovie(MovieDTO movieDTO) {
+//        Optional<Movie> optionalMovie = movieDAO.findById(movieDTO.getId());
+//
+//        if (optionalMovie.isPresent()) {
+//            Movie movie = optionalMovie.get();
+//
+//            // Update fields if present in the DTO
+//            if (movieDTO.getTitle() != null) {
+//                movie.setTitle(movieDTO.getTitle());
+//            }
+//            if (movieDTO.getEnglishTitle() != null) {
+//                movie.setEnglishTitle(movieDTO.getEnglishTitle());
+//            }
+//            if (movieDTO.getReleaseDate() != null) {
+//                movie.setReleaseDate(movieDTO.getReleaseDate());
+//            }
+//            if (movieDTO.getVoteAverage() != 0.0) {
+//                movie.setVoteAverage(movieDTO.getVoteAverage());
+//            }
+//
+//            // Update actors
+//            if (movieDTO.getActors() != null) {
+//                Set<Actor> actors = movieDTO.getActors().stream()
+//                    .map(actorDTO -> {
+//                        Optional<Actor> existingActor = actorDAO.findByName(actorDTO.getName());
+//                        if (existingActor.isPresent()) {
+//                            return existingActor.get();  // Use the existing actor
+//                        } else {
+//                            Actor newActor = new Actor(actorDTO);  // Create new actor
+//                            actorDAO.create(newActor);  // Persist new actor
+//                            return newActor;
+//                        }
+//                    })
+//                    .collect(Collectors.toSet());
+//                movie.setActors(actors);
+//            }
+//
+//            // Update genres
+//            if (movieDTO.getGenres() != null) {
+//                Set<Genre> genres = movieDTO.getGenres().stream()
+//                    .map(genreDTO -> {
+//                        Optional<Genre> existingGenre = genreDAO.findByName(genreDTO.getGenreName());
+//                        if (existingGenre.isPresent()) {
+//                            return existingGenre.get();  // Use the existing genre
+//                        } else {
+//                            Genre newGenre = new Genre(genreDTO);  // Create new genre
+//                            genreDAO.create(newGenre);  // Persist new genre
+//                            return newGenre;
+//                        }
+//                    })
+//                    .collect(Collectors.toSet());
+//                movie.setGenres(genres);
+//            }
+//
+//            // Update director
+//            if (movieDTO.getDirector() != null) {
+//                Optional<Director> existingDirector = directorDAO.findByName(movieDTO.getDirector().getName());
+//                if (existingDirector.isPresent()) {
+//                    movie.setDirector(existingDirector.get());  // Use existing director
+//                } else {
+//                    Director newDirector = new Director(movieDTO.getDirector());  // Create new director
+//                    directorDAO.create(newDirector);  // Persist new director
+//                    movie.setDirector(newDirector);
+//                }
+//            }
+//
+//            // Update the movie entity in the database
+//            movieDAO.update(movie);
+//        } else {
+//            throw new IllegalArgumentException("Movie with ID " + movieDTO.getId() + " not found.");
+//        }
+//    }
+
+
+
+
+
+
+
+
+
+
             em.getTransaction().begin();
             em.merge(movie);
             em.getTransaction().commit();
