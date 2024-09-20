@@ -74,6 +74,7 @@ public class Main {
         movieService.updateMovie(movieDTOToUpdate);
 
         System.out.println("Updated movie: " + movieDTOToUpdate.buildMovieDetails());
+        
 
 
 

@@ -42,25 +42,25 @@ public class MovieService {
     }
 
 
-        public MovieDTO getMovieById (Long id){
-            try {
-                Optional<Movie> movie = movieDAO.findById(id);
-                MovieDTO movieDTO = movie.map(MovieDTO::new)
-                    .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
-                System.out.println("The movie with ID " + id + " was found. ");
-                return movieDTO;
-            } catch (JpaException e) {
-                System.out.println("JpaException: " + e.getMessage());
-                throw e;
-            }
-
+    public MovieDTO getMovieById(Long id) {
+        try {
+            Optional<Movie> movie = movieDAO.findById(id);
+            MovieDTO movieDTO = movie.map(MovieDTO::new)
+                .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
+            System.out.println("The movie with ID " + id + " was found. ");
+            return movieDTO;
+        } catch (JpaException e) {
+            System.out.println("JpaException: " + e.getMessage());
+            throw e;
         }
 
-        public List<MovieDTO> getAllMovies () {
-            return movieDAO.findAll().stream()
-                .map(MovieDTO::new)
-                .collect(Collectors.toList());
-        }
+    }
+
+    public List<MovieDTO> getAllMovies() {
+        return movieDAO.findAll().stream()
+            .map(MovieDTO::new)
+            .collect(Collectors.toList());
+    }
 
 
     public void deleteMovie(Long id) {
@@ -72,7 +72,13 @@ public class MovieService {
             throw e;
         }
     }
-        public Optional<Movie> findMovieByTitle (String title){
+
+    public Optional<Movie> findMovieByTitle(String title) {
+        try {
             return movieDAO.findByName(title);
+        } catch (JpaException e) {
+            System.out.println("Failed to find movie by title: " + e.getMessage());
+            throw e;
         }
     }
+}
