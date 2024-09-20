@@ -206,12 +206,10 @@ class MovieDAOTest {
         assertTrue(optionalMovie.isPresent());
 
         // Expected movie title
-        String expectedTitle = "test 1";
-        String expectedTitleWithUpperCase = "Test 1";
+        String expectedTitle = "Test 1";
 
         // Check if the movie title is correct
         assertEquals(expectedTitle, optionalMovie.get().getTitle());
-        assertEquals(expectedTitleWithUpperCase, optionalMovie.get().getTitle());
     }
 
     @Test

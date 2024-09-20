@@ -134,6 +134,8 @@ public class MovieService {
     }
 
 
+
+
     public static void main(String[] args) {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
         MovieService movieService = new MovieService(emf);
