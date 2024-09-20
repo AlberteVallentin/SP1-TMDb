@@ -180,10 +180,37 @@ class MovieDAOTest {
         assertEquals(2, optionalMovie.get().getGenres().size());
         assertEquals(2, optionalMovie.get().getActors().size());
         assertEquals("Updated director", optionalMovie.get().getDirector().getName());
-        
+
     }
 
+    @Test
+    void delete() {
+        // Delete the first movie
+        movieDAO.delete(m1.getId());
+
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was deleted
+        assertFalse(optionalMovie.isPresent());
+    }
+
+    @Test
+    void findByName() {
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findByName("test 1");
 
 
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Expected movie title
+        String expectedTitle = "test 1";
+        String expectedTitleWithUpperCase = "Test 1";
+
+        // Check if the movie title is correct
+        assertEquals(expectedTitle, optionalMovie.get().getTitle());
+        assertEquals(expectedTitleWithUpperCase, optionalMovie.get().getTitle());
+    }
 
 }

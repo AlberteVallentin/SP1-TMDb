@@ -9,7 +9,6 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MovieService {
@@ -31,16 +30,15 @@ public class MovieService {
     }
 
 
-    public MovieDTO updateMovie(MovieDTO movieDTO) {
+    public void updateMovie(MovieDTO movieDTO) {
         try {
             Movie movie = movieDTO.toEntity();
-            Optional<Movie> optionalMovie = movieDAO.findById(movieDTO.getId());
+            movieDAO.findById(movie.getId());
             movieDAO.update(movie);
         } catch (JpaException e) {
             System.out.println("Failed to update movie: " + e.getMessage());
             throw e;
         }
-        return movieDTO;
     }
 
 
@@ -65,10 +63,15 @@ public class MovieService {
         }
 
 
-        public void deleteMovie (Long id){
+    public void deleteMovie(Long id) {
+        try {
             movieDAO.delete(id);
+            System.out.println("The movie with ID " + id + " was deleted.");
+        } catch (JpaException e) {
+            System.out.println("Failed to delete movie: " + e.getMessage());
+            throw e;
         }
-
+    }
         public Optional<Movie> findMovieByTitle (String title){
             return movieDAO.findByName(title);
         }

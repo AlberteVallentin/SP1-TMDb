@@ -42,8 +42,12 @@ public class DirectorDAO implements IDAO<Director> {
     }
 
     @Override
-    public Optional<Director> update(Director entity) {
-        return Optional.empty();
+    public void update(Director entity) {
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.merge(entity);
+            em.getTransaction().commit();
+        }
     }
 
 

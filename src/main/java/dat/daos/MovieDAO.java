@@ -123,14 +123,14 @@ public class MovieDAO implements IDAO<Movie> {
     }
 
     @Override
-    public Optional<Movie> update(Movie movie) {
+    public void update(Movie movie) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
             // Find the existing movie in the database
             Movie existingMovie = em.find(Movie.class, movie.getId());
             if (existingMovie == null) {
-                return Optional.empty(); // Return empty Optional if movie not found
+                throw new JpaException("Movie with ID " + movie.getId() + " not found in the database.");
             }
 
             // Update fields
@@ -207,7 +207,6 @@ public class MovieDAO implements IDAO<Movie> {
             em.merge(existingMovie);
 
             em.getTransaction().commit();
-            return Optional.of(existingMovie); // Return the updated movie wrapped in an Optional
         } catch (Exception e) {
             throw new JpaException("Failed to update movie in the database", e);
         }
@@ -220,8 +219,12 @@ public class MovieDAO implements IDAO<Movie> {
             Movie movie = em.find(Movie.class, id);
             if (movie != null) {
                 em.remove(movie);
+            } else {
+                throw new JpaException("Movie with ID " + id + " not found in the database.");
             }
             em.getTransaction().commit();
+        } catch (Exception e) {
+            throw new JpaException("Failed to delete movie from the database", e);
         }
     }
 
@@ -233,8 +236,5 @@ public class MovieDAO implements IDAO<Movie> {
             return query.getResultStream().findFirst();
         }
     }
-
-
-
 
 }

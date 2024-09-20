@@ -42,8 +42,12 @@ public class ActorDAO implements IDAO<Actor> {
     }
 
     @Override
-    public Optional<Actor> update(Actor entity) {
-        return Optional.empty();
+    public void update(Actor entity) {
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.merge(entity);
+            em.getTransaction().commit();
+        }
     }
 
 
