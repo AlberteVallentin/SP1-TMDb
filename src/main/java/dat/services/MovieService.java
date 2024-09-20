@@ -146,6 +146,7 @@ public class MovieService {
 //        movieDTO.setEnglishTitle(null);
 //        movieDTO.setReleaseDate(LocalDate.of(2024, 07, 14));
 //        movieDTO.setVoteAverage(0.0);
+       // movieDTO.setPopularity(3.4);
 //        movieDTO.setGenres(new HashSet<>() {{
 //            add(new GenreDTO("Drama"));
 //            add(new GenreDTO("War"));
