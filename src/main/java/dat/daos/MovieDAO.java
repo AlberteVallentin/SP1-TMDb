@@ -32,6 +32,19 @@ public class MovieDAO implements IDAO<Movie> {
                 throw new JpaException("Title and Release Date are required fields and cannot be null.");
             }
 
+            // Check if a movie with the same title and release date already exists
+            TypedQuery<Movie> query = em.createQuery(
+                "SELECT m FROM Movie m WHERE LOWER(m.title) = LOWER(:title) AND m.releaseDate = :releaseDate",
+                Movie.class
+            );
+            query.setParameter("title", movie.getTitle());
+            query.setParameter("releaseDate", movie.getReleaseDate());
+            List<Movie> existingMovies = query.getResultList();
+
+            if (!existingMovies.isEmpty()) {
+                throw new JpaException("A movie with the same title and release date already exists.");
+            }
+
             // Set English title if it's not null or empty
             movie.setEnglishTitle(movie.getEnglishTitle() != null && !movie.getEnglishTitle().isEmpty() ? movie.getEnglishTitle() : null);
 

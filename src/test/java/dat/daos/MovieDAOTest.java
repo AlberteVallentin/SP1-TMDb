@@ -6,6 +6,7 @@ import dat.dtos.DirectorDTO;
 import dat.dtos.GenreDTO;
 import dat.dtos.MovieDTO;
 import dat.entities.Movie;
+import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
@@ -211,6 +212,34 @@ class MovieDAOTest {
         // Check if the movie title is correct
         assertEquals(expectedTitle, optionalMovie.get().getTitle());
         assertEquals(expectedTitleWithUpperCase, optionalMovie.get().getTitle());
+    }
+
+    @Test
+    void movieAlreadyExists() {
+        // Try to create a movie that already exists
+        MovieDTO m3 = new MovieDTO();
+        m3.setTitle("Test 1");
+        m3.setEnglishTitle("English title 1");
+        m3.setReleaseDate(LocalDate.of(2024, 7, 14));
+        m3.setVoteAverage(8.0);
+        m3.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
+        m3.setActors(new HashSet<>() {{
+            add(new ActorDTO("Tom Hanks"));
+        }});
+        m3.setDirector(new DirectorDTO("Steven Spielberg"));
+
+        // Try to create the movie
+        Movie movie3 = m3.toEntity();
+
+        // Check if the exception was thrown
+        assertThrows(JpaException.class, () -> movieDAO.create(movie3));
+
+
+
+
     }
 
 }
