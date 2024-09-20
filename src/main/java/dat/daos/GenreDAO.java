@@ -1,6 +1,7 @@
 package dat.daos;
 
 import dat.entities.Genre;
+import dat.entities.Movie;
 import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -129,6 +130,17 @@ public class GenreDAO implements IDAO<Genre> {
             );
             query.setParameter("genreName", genreName);
             return query.getResultStream().findFirst();
+        }
+    }
+
+
+    // Fetch all movies within a specific genre
+    public List<Movie> findMoviesByGenre(String genreName) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery(
+                "SELECT m FROM Movie m JOIN m.genres g WHERE LOWER(g.genreName) = LOWER(:genreName)", Movie.class);
+            query.setParameter("genreName", genreName);
+            return query.getResultList();
         }
     }
 }

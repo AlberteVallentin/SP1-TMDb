@@ -1,7 +1,9 @@
 package dat.services;
 
+import dat.config.HibernateConfig;
 import dat.daos.GenreDAO;
 import dat.dtos.GenreDTO;
+import dat.dtos.MovieDTO;
 import dat.entities.Genre;
 import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManagerFactory;
@@ -9,6 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 public class GenreService {
     private final GenreDAO genreDAO;
@@ -78,6 +81,26 @@ public class GenreService {
             System.out.println("Failed to find genre by name: " + e.getMessage());
             throw e;
         }
+    }
+
+    // Fetch all movies within a genre
+    public List<MovieDTO> getMoviesByGenre(String genreName) {
+        return genreDAO.findMoviesByGenre(genreName).stream()
+            .map(MovieDTO::new)
+            .collect(Collectors.toList());
+    }
+
+    public static void main(String[] args) {
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
+        GenreService genreService = new GenreService(emf);
+
+        // Get all genres
+        List<GenreDTO> genres = genreService.getAllGenres();
+        genres.forEach(g -> System.out.println(g.getGenreName()));
+
+        // Get all movies within a genre
+        List<MovieDTO> movies = genreService.getMoviesByGenre("Action");
+        movies.forEach(m -> System.out.println(m.buildMovieDetails()));
     }
 }
 

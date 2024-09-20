@@ -250,4 +250,47 @@ public class MovieDAO implements IDAO<Movie> {
         }
     }
 
+    public List<Movie> findByTitleContains(String searchString) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery(
+                "SELECT m FROM Movie m WHERE LOWER(m.title) LIKE LOWER(:searchString)", Movie.class);
+            query.setParameter("searchString", "%" + searchString + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new JpaException("Failed to search movies by title", e);
+        }
+    }
+
+    // Get the total average rating of all movies
+    public double getTotalAverageRating() {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Double> query = em.createQuery("SELECT AVG(m.voteAverage) FROM Movie m", Double.class);
+            return query.getSingleResult();
+        } catch (Exception e) {
+            throw new JpaException("Failed to get total average rating", e);
+        }
+    }
+
+    // Get the top X highest rated movies
+    public List<Movie> getTopXHighestRatedMovies(int x) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m ORDER BY m.voteAverage DESC", Movie.class);
+            query.setMaxResults(x);  // Limit the number of results to x
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new JpaException("Failed to get top X highest rated movies", e);
+        }
+    }
+
+    // Get the top X lowest rated movies
+    public List<Movie> getTopXLowestRatedMovies(int x) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m ORDER BY m.voteAverage ASC", Movie.class);
+            query.setMaxResults(x);  // Limit the number of results to x
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new JpaException("Failed to get top X lowest rated movies", e);
+        }
+    }
+
 }

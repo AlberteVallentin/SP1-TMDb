@@ -236,10 +236,7 @@ class MovieDAOTest {
 
         // Check if the exception was thrown
         assertThrows(JpaException.class, () -> movieDAO.create(movie3));
-
-
-
-
     }
+
 
 }
