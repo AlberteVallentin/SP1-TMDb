@@ -24,7 +24,6 @@ public class GenreDTO {
     // Method to convert GenreDTO to Genre entity
     public Genre toEntity() {
         Genre genre = new Genre();
-        genre.setId(this.id);
         genre.setGenreName(this.genreName);
         return genre;
     }

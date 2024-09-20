@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
-import java.util.ArrayList;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MovieDAOTest {
@@ -52,28 +51,40 @@ class MovieDAOTest {
         }
 
         // Initialize and persist MovieDTO objects
-        m1 = new MovieDTO("Test 1", "English title 1", LocalDate.of(2024, 7, 14), 8.0,
-            new DirectorDTO("Steven Spielberg"),
-            new HashSet<>() {{
-                add(new GenreDTO("Drama"));
-                add(new GenreDTO("War"));
-            }},
-            new HashSet<>() {{
-                add(new ActorDTO("Tom Hanks"));
-            }});
+        m1 = new MovieDTO();
+        m1.setTitle("Test 1");
+        m1.setEnglishTitle("English title 1");
+        m1.setReleaseDate(LocalDate.of(2024, 7, 14));
+        m1.setVoteAverage(8.0);
+        m1.setPopularity(3.4);
+        m1.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
+        m1.setActors(new HashSet<>() {{
+            add(new ActorDTO("Tom Hanks"));
+        }});
+        m1.setDirector(new DirectorDTO("Steven Spielberg"));
 
-        m2 = new MovieDTO("Test 2", "English title 2", LocalDate.of(2024, 7, 14), 8.0,
-            new DirectorDTO("Martin Scorsese"),
-            new HashSet<>() {{
-                add(new GenreDTO("Action"));
-            }},
-            new HashSet<>() {{
-                add(new ActorDTO("Leonardo DiCaprio"));
-            }});
+        m2 = new MovieDTO();
+        m2.setTitle("Test 2");
+        m2.setEnglishTitle(null);
+        m2.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m2.setVoteAverage(9.0);
+        m2.setPopularity(5.6);
+        m2.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Action"));
+            add(new GenreDTO("War"));
+        }});
+        m2.setActors(new HashSet<>() {{
+            add(new ActorDTO("Actor 1"));
+            add(new ActorDTO("Actor 2"));
+        }});
+        m2.setDirector(new DirectorDTO("Director"));
 
         // Convert MovieDTO to Movie entity
         Movie movie1 = m1.toEntity();
-        Movie movie2 = m2.toEntity();
+        Movie movie2 = MovieDAOTest.m2.toEntity();
 
         // Persist the movies
         movieDAO.create(movie1);
@@ -81,7 +92,7 @@ class MovieDAOTest {
 
         // Set the IDs of the MovieDTO objects
         m1.setId(movie1.getId());
-        m2.setId(movie2.getId());
+        MovieDAOTest.m2.setId(movie2.getId());
 
 
     }
@@ -96,6 +107,7 @@ class MovieDAOTest {
         m3.setEnglishTitle(null);
         m3.setReleaseDate(LocalDate.of(2023, 03, 14));
         m3.setVoteAverage(0.0);
+        m3.setPopularity(3.4);
         m3.setGenres(new HashSet<>() {{
                 add(new GenreDTO("Drama"));
                 add(new GenreDTO("War"));
@@ -154,6 +166,7 @@ class MovieDAOTest {
         m1.setEnglishTitle("Updated English title");
         m1.setReleaseDate(LocalDate.of(2023, 03, 14));
         m1.setVoteAverage(9.0);
+        m1.setPopularity(2.0);
         m1.setGenres(new HashSet<>() {{
             add(new GenreDTO("Action"));
             add(new GenreDTO("Adventure"));
@@ -220,6 +233,7 @@ class MovieDAOTest {
         m3.setEnglishTitle("English title 1");
         m3.setReleaseDate(LocalDate.of(2024, 7, 14));
         m3.setVoteAverage(8.0);
+        m3.setPopularity(3.4);
         m3.setGenres(new HashSet<>() {{
             add(new GenreDTO("Drama"));
             add(new GenreDTO("War"));

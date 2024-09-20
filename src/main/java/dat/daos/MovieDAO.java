@@ -51,6 +51,9 @@ public class MovieDAO implements IDAO<Movie> {
             // Set VoteAverage (optional, can be null)
             movie.setVoteAverage(movie.getVoteAverage());
 
+            // Set Popularity (optional, can be null)
+            movie.setPopularity(movie.getPopularity());
+
             // Check if actors exist, if not persist them (can be null)
             Set<Actor> actorsToAdd = new HashSet<>();
             if (movie.getActors() != null) {
@@ -154,6 +157,7 @@ public class MovieDAO implements IDAO<Movie> {
             existingMovie.setReleaseDate(movie.getReleaseDate());
             existingMovie.setEnglishTitle(movie.getEnglishTitle() != null && !movie.getEnglishTitle().isEmpty() ? movie.getEnglishTitle() : null);
             existingMovie.setVoteAverage(movie.getVoteAverage());
+            existingMovie.setPopularity(movie.getPopularity());
 
             // Update actors
             Set<Actor> actorsToAdd = new HashSet<>();

@@ -18,6 +18,7 @@ public class MovieDTO {
     private String englishTitle;
     private LocalDate releaseDate;
     private double voteAverage;
+    private double popularity;
 
     private Set<GenreDTO> genres;
     private Set<ActorDTO> actors;
@@ -30,6 +31,7 @@ public class MovieDTO {
         this.englishTitle = movie.getEnglishTitle();
         this.releaseDate = movie.getReleaseDate();
         this.voteAverage = movie.getVoteAverage();
+        this.popularity = movie.getPopularity();
 
         // Convert Genre, Actor, Director to DTOs
         this.genres = movie.getGenres() != null ? movie.getGenres().stream().map(GenreDTO::new).collect(Collectors.toSet()) : null;
@@ -37,11 +39,12 @@ public class MovieDTO {
         this.director = movie.getDirector() != null ? new DirectorDTO(movie.getDirector()) : null;
     }
 
-    public MovieDTO(String title, String englishTitle, LocalDate releaseDate, double voteAverage, DirectorDTO director, Set<GenreDTO> genres, Set<ActorDTO> actors) {
+    public MovieDTO(String title, String englishTitle, LocalDate releaseDate, double voteAverage, double popularity, DirectorDTO director, Set<GenreDTO> genres, Set<ActorDTO> actors) {
         this.title = title;
         this.englishTitle = englishTitle;
         this.releaseDate = releaseDate;
         this.voteAverage = voteAverage;
+        this.popularity = popularity;
         this.director = director;
         this.genres = genres;
         this.actors = actors;
@@ -55,6 +58,7 @@ public class MovieDTO {
         movie.setEnglishTitle(this.englishTitle);
         movie.setReleaseDate(this.releaseDate);
         movie.setVoteAverage(this.voteAverage);
+        movie.setPopularity(this.popularity);
 
         if (this.genres != null) {
             movie.setGenres(this.genres.stream().map(GenreDTO::toEntity).collect(Collectors.toSet()));
@@ -79,6 +83,7 @@ public class MovieDTO {
         }
         sb.append("Release Date: ").append(releaseDate).append("\n");
         sb.append("Vote Average: ").append(voteAverage).append("\n");
+        sb.append("Popularity: ").append(popularity).append("\n");
         if (genres != null && !genres.isEmpty()) {
             sb.append("Genres: ");
             genres.forEach(genre -> sb.append(genre.getGenreName()).append(", "));

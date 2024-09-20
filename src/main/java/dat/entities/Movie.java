@@ -23,6 +23,7 @@ public class Movie {
     private String englishTitle;
     private LocalDate releaseDate;
     private double voteAverage;
+    private double popularity;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "movie_genre",
@@ -40,25 +41,5 @@ public class Movie {
     @JoinColumn(name = "director_id")
     private Director director;
 
-
-    //    public Movie(MovieDTO movieDTO) {
-//        this.title = movieDTO.getTitle();
-//        this.englishTitle = movieDTO.getEnglishTitle();
-//        this.releaseDate = movieDTO.getReleaseDate();
-//        this.voteAverage = movieDTO.getVoteAverage();
-//        this.genres = movieDTO.getGenres()
-//            .stream()
-//            .map(Genre::new)
-//            .collect(Collectors.toSet());
-//        this.actors = movieDTO.getActors()
-//            .stream()
-//            .map(Actor::new)
-//            .collect(Collectors.toSet());
-//        if (movieDTO.getDirector() != null) {
-//            this.director = new Director(movieDTO.getDirector());
-//        } else {
-//            this.director = null;
-//        }
-//    }
 }
 
