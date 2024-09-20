@@ -152,6 +152,7 @@ public class MovieFetcher {
                     movieDTO.setTitle(movieDetails.get("original_title").asText());
                     movieDTO.setEnglishTitle(movieDetails.get("title").asText());
 
+
                     // Check if release_date is not null or empty
                     JsonNode releaseDateNode = movieDetails.get("release_date");
                     if (releaseDateNode != null && !releaseDateNode.asText().isEmpty()) {
@@ -162,6 +163,7 @@ public class MovieFetcher {
                     }
 
                     movieDTO.setVoteAverage(movieDetails.get("vote_average").asDouble());
+                    movieDTO.setPopularity(movieDetails.get("popularity").asDouble());
 
                     // Extract genres
                     JsonNode genres = movieDetails.get("genres");
