@@ -3,12 +3,20 @@ package dat.daos;
 import dat.config.HibernateConfig;
 import dat.dtos.DirectorDTO;
 import dat.entities.Director;
+
+import dat.entities.Movie;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
+
+import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
 class DirectorDAOTest {
 
@@ -18,26 +26,27 @@ class DirectorDAOTest {
     private static DirectorDTO d2;
 
     @BeforeAll
-    static void BeforeAll() {
+    static void setUpBeforeAll() {
+
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         directorDAO = new DirectorDAO(emf);
     }
 
     @BeforeEach
     void setUp() {
-        // Clear the database before each test
+
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             em.createQuery("DELETE FROM Director").executeUpdate();
             em.createNativeQuery("ALTER SEQUENCE director_id_seq RESTART WITH 1").executeUpdate();
+            em.createQuery("DELETE FROM Movie").executeUpdate();
+            em.createNativeQuery("ALTER SEQUENCE movie_id_seq RESTART WITH 1").executeUpdate();
             em.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         // Initialize and persist DirectorDTO objects
         d1 = new DirectorDTO("Steven Spielberg");
-        d2 = new DirectorDTO("Martin Scorsese");
+        d2 = new DirectorDTO("Christopher Nolan");
 
         // Convert DirectorDTO to Director entity
         Director director1 = d1.toEntity();
@@ -52,18 +61,13 @@ class DirectorDAOTest {
         d2.setId(director2.getId());
     }
 
-    @AfterAll
-   static void tearDown() {
-        emf.close();
-    }
 
     @Test
-    @DisplayName("Test create director")
-    void create() {
+    void createDirector() {
         // Create a new DirectorDTO
         DirectorDTO d3 = new DirectorDTO("Quentin Tarantino");
 
-        // Convert to entity and create the director
+        // Create the director
         Director director3 = d3.toEntity();
         directorDAO.create(director3);
 
@@ -75,63 +79,32 @@ class DirectorDAOTest {
     }
 
     @Test
-    @DisplayName("Test find director by ID")
-    void findById() {
-        // Find director by ID
-        Optional<Director> foundDirector = directorDAO.findById(d1.getId());
-
-        // Check if the director is found
-        assertEquals(d1.getName(), foundDirector.get().getName());
+    void findDirectorById() {
+        Optional<Director> director = directorDAO.findById(1L);
+        assertTrue(director.isPresent());
+        assertEquals("Steven Spielberg", director.get().getName());
     }
 
     @Test
-    void findAll() {
-        // Find all directors
-        assertEquals(2, directorDAO.findAll().size());
+    void findAllDirectors() {
+        List<Director> directors = directorDAO.findAll();
+        assertEquals(2, directors.size());
     }
 
     @Test
-    @DisplayName("Test update director")
-    void update() {
-        // Fetch the persisted director
-        Optional<Director> optionalDirectorToUpdate = directorDAO.findById(d1.getId());
+    void updateDirector() {
+        d1.setName("Updated Steven Spielberg");
+        directorDAO.update(d1.toEntity());
+        Optional<Director> director = directorDAO.findById(d1.getId());
 
-        // Ensure the director exists
-        if (optionalDirectorToUpdate.isPresent()) {
-            Director directorToUpdate = optionalDirectorToUpdate.get();
-
-            // Modify the director's name
-            directorToUpdate.setName("Updated Name");
-
-            // Update the director
-            try {
-                directorDAO.update(directorToUpdate);
-
-                // Re-fetch the updated director from the database
-                Optional<Director> optionalUpdatedDirector = directorDAO.findById(d1.getId());
-                assertTrue(optionalUpdatedDirector.isPresent(), "Updated director should be found");
-
-                Director updatedDirector = optionalUpdatedDirector.get();
-                // Check if the name was updated correctly
-                assertEquals("Updated Name", updatedDirector.getName());
-
-            } catch (IllegalArgumentException e) {
-                fail("Update failed with exception: " + e.getMessage());
-            }
-        } else {
-            fail("Director to update not found");
-        }
+        assertEquals("Updated Steven Spielberg", director.get().getName());
     }
 
     @Test
-    @DisplayName("Test delete director")
-    void delete() {
-        // Delete the first director
+    void deleteDirector() {
         directorDAO.delete(d1.getId());
-
-        // Check if the director was deleted
-        Optional<Director> deletedDirector = directorDAO.findById(d1.getId());
-        assertTrue(deletedDirector.isEmpty());
+        Optional<Director> director = directorDAO.findById(d1.getId());
+        assertFalse(director.isPresent());
     }
-}
 
+}
