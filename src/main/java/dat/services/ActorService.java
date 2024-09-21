@@ -1,5 +1,6 @@
 package dat.services;
 
+import dat.config.HibernateConfig;
 import dat.daos.ActorDAO;
 import dat.dtos.ActorDTO;
 import dat.dtos.MovieDTO;
@@ -90,4 +91,15 @@ public class ActorService {
             throw e;
         }
     }
-}
+
+    public static void main(String[] args) {
+        // Test the ActorService class
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
+        ActorService actorService = new ActorService(emf);
+
+        // Find actor by name
+        Optional<Actor> actor = actorService.findActorByName("Mathias Broe");
+        System.out.println("Actor found by name: " + actor.get().getName());
+        }
+
+    }

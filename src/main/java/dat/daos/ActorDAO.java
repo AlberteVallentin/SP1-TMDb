@@ -18,6 +18,7 @@ public class ActorDAO implements IDAO<Actor> {
         this.emf = emf;
     }
 
+
     @Override
     public void create(Actor actor) {
         try (EntityManager em = emf.createEntityManager()) {
