@@ -1,132 +1,237 @@
 package dat.services;
 
-import dat.daos.ActorDAO;
-import dat.daos.DirectorDAO;
-import dat.daos.GenreDAO;
+import dat.config.HibernateConfig;
 import dat.daos.MovieDAO;
+import dat.dtos.ActorDTO;
+import dat.dtos.GenreDTO;
 import dat.dtos.MovieDTO;
-import dat.entities.Director;
 import dat.entities.Movie;
-import dat.entities.Actor;
-import dat.entities.Genre;
 
+import dat.exceptions.JpaException;
 import jakarta.persistence.EntityManagerFactory;
+
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MovieService {
     private final MovieDAO movieDAO;
-    private final ActorDAO actorDAO;
-    private final GenreDAO genreDAO;
-    private final DirectorDAO directorDAO;
 
     public MovieService(EntityManagerFactory emf) {
         this.movieDAO = new MovieDAO(emf);
-        this.actorDAO = new ActorDAO(emf);
-        this.genreDAO = new GenreDAO(emf);
-        this.directorDAO = new DirectorDAO(emf);
     }
 
 
     public void createMovie(MovieDTO movieDTO) {
-        Movie movie = new Movie(movieDTO);
-        movieDAO.create(movie);
-    }
-
-
-    public Optional<Movie> findMovieById(Long id) {
-        return movieDAO.findById(id);
-    }
-
-
-    public List<Movie> getAllMovies() {
-        return movieDAO.findAll();
-    }
-
-
-    public void updateMovie(MovieDTO movieDTO) {
-        Optional<Movie> optionalMovie = movieDAO.findById(movieDTO.getId());
-
-        if (optionalMovie.isPresent()) {
-            Movie movie = optionalMovie.get();
-
-            // Update fields if present in the DTO
-            if (movieDTO.getTitle() != null) {
-                movie.setTitle(movieDTO.getTitle());
-            }
-            if (movieDTO.getEnglishTitle() != null) {
-                movie.setEnglishTitle(movieDTO.getEnglishTitle());
-            }
-            if (movieDTO.getReleaseDate() != null) {
-                movie.setReleaseDate(movieDTO.getReleaseDate());
-            }
-            if (movieDTO.getVoteAverage() != 0.0) {
-                movie.setVoteAverage(movieDTO.getVoteAverage());
-            }
-
-            // Update actors
-            if (movieDTO.getActors() != null) {
-                Set<Actor> actors = movieDTO.getActors().stream()
-                    .map(actorDTO -> {
-                        Optional<Actor> existingActor = actorDAO.findByName(actorDTO.getName());
-                        if (existingActor.isPresent()) {
-                            return existingActor.get();  // Use the existing actor
-                        } else {
-                            Actor newActor = new Actor(actorDTO);  // Create new actor
-                            actorDAO.create(newActor);  // Persist new actor
-                            return newActor;
-                        }
-                    })
-                    .collect(Collectors.toSet());
-                movie.setActors(actors);
-            }
-
-            // Update genres
-            if (movieDTO.getGenres() != null) {
-                Set<Genre> genres = movieDTO.getGenres().stream()
-                    .map(genreDTO -> {
-                        Optional<Genre> existingGenre = genreDAO.findByName(genreDTO.getGenreName());
-                        if (existingGenre.isPresent()) {
-                            return existingGenre.get();  // Use the existing genre
-                        } else {
-                            Genre newGenre = new Genre(genreDTO);  // Create new genre
-                            genreDAO.create(newGenre);  // Persist new genre
-                            return newGenre;
-                        }
-                    })
-                    .collect(Collectors.toSet());
-                movie.setGenres(genres);
-            }
-
-            // Update director
-            if (movieDTO.getDirector() != null) {
-                Optional<Director> existingDirector = directorDAO.findByName(movieDTO.getDirector().getName());
-                if (existingDirector.isPresent()) {
-                    movie.setDirector(existingDirector.get());  // Use existing director
-                } else {
-                    Director newDirector = new Director(movieDTO.getDirector());  // Create new director
-                    directorDAO.create(newDirector);  // Persist new director
-                    movie.setDirector(newDirector);
-                }
-            }
-
-            // Update the movie entity in the database
-            movieDAO.update(movie);
-        } else {
-            throw new IllegalArgumentException("Movie with ID " + movieDTO.getId() + " not found.");
+        try {
+            Movie movie = movieDTO.toEntity();
+            movieDAO.create(movie);
+        } catch (JpaException e) {
+            System.out.println("Failed to create movie: " + e.getMessage());
+            throw e;
         }
     }
 
 
+    public void updateMovie(MovieDTO movieDTO) {
+        try {
+            Movie movie = movieDTO.toEntity();
+            movieDAO.findById(movie.getId());
+            movieDAO.update(movie);
+        } catch (JpaException e) {
+            System.out.println("Failed to update movie: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
+    public MovieDTO getMovieById(Long id) {
+        try {
+            Optional<Movie> movie = movieDAO.findById(id);
+            MovieDTO movieDTO = movie.map(MovieDTO::new)
+                .orElseThrow(() -> new JpaException("No movie found with ID: " + id));
+            System.out.println("The movie with ID " + id + " was found. ");
+            return movieDTO;
+        } catch (JpaException e) {
+            System.out.println("JpaException: " + e.getMessage());
+            throw e;
+        }
+
+    }
+
+    public List<MovieDTO> getAllMovies() {
+        return movieDAO.findAll().stream()
+            .map(MovieDTO::new)
+            .collect(Collectors.toList());
+    }
 
 
     public void deleteMovie(Long id) {
-        movieDAO.delete(id);
+        try {
+            movieDAO.delete(id);
+            System.out.println("The movie with ID " + id + " was deleted.");
+        } catch (JpaException e) {
+            System.out.println("Failed to delete movie: " + e.getMessage());
+            throw e;
+        }
     }
 
     public Optional<Movie> findMovieByTitle(String title) {
-        return movieDAO.findByName(title);
+        try {
+            return movieDAO.findByName(title);
+        } catch (JpaException e) {
+            System.out.println("Failed to find movie by title: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public List<MovieDTO> searchMoviesByTitle(String searchString) {
+        try {
+            List<Movie> movies = movieDAO.findByTitleContains(searchString);
+            return movies.stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to search movies by title: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Get the total average rating of all movies
+    public double getTotalAverageRating() {
+        try {
+            return movieDAO.getTotalAverageRating();
+        } catch (JpaException e) {
+            System.out.println("Failed to get total average rating: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Get the top X highest rated movies
+    public List<MovieDTO> getTopXHighestRatedMovies(int x) {
+        try {
+            return movieDAO.getTopXHighestRatedMovies(x).stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get top " + x + " highest rated movies: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Get the top X lowest rated movies
+    public List<MovieDTO> getTopXLowestRatedMovies(int x) {
+        try {
+            return movieDAO.getTopXLowestRatedMovies(x).stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get top " + x + " lowest rated movies: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Get the top X most popular movies
+    public List<MovieDTO> getTopXMostPopularMovies(int x) {
+        try {
+            return movieDAO.getTheTopXMostPopularMovies(x).stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get top " + x + " most popular movies: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
+        MovieService movieService = new MovieService(emf);
+
+//        // Create a new movieDTO
+//        MovieDTO movieDTO = new MovieDTO();
+//        movieDTO.setTitle("titel");
+//        movieDTO.setEnglishTitle(null);
+//        movieDTO.setReleaseDate(LocalDate.of(2024, 07, 14));
+//        movieDTO.setVoteAverage(0.0);
+       // movieDTO.setPopularity(3.4);
+//        movieDTO.setGenres(new HashSet<>() {{
+//            add(new GenreDTO("Drama"));
+//            add(new GenreDTO("War"));
+//        }});
+//        movieDTO.setActors(null);
+//        movieDTO.setDirector(null);
+//
+//
+//        // Create the movie in the database
+//        movieService.createMovie(movieDTO);
+//
+//        // Retrieve the movie by ID
+//        Long movieId = 1L;
+//        MovieDTO movieDTOFoundById = movieService.getMovieById(movieId);
+//        System.out.println("Retrieved movie: " + movieDTOFoundById.buildMovieDetails());
+//
+//        // Retrieve all movies
+//        List<MovieDTO> allMovies = movieService.getAllMovies();
+//        for (MovieDTO allMoviesDTO : allMovies) {
+//            System.out.println(allMoviesDTO.buildMovieDetails());
+//            System.out.println("--------------------");
+//        }
+//
+//        // Update the movie
+//        Long movieIdToUpdate = 1158L;
+//        MovieDTO movieDTOToUpdate = movieService.getMovieById(movieIdToUpdate);
+//        System.out.println("Movie before update: " + movieDTOToUpdate.buildMovieDetails());
+//        movieDTOToUpdate.setTitle("Updated Title");
+//        movieDTOToUpdate.setEnglishTitle("Updated English Title");
+//        movieDTOToUpdate.setReleaseDate(LocalDate.of(2024, 07, 14));
+//        movieDTOToUpdate.setVoteAverage(7.0);
+//        movieDTOToUpdate.setGenres(new HashSet<>() {{
+//            add(new GenreDTO("Action"));
+//            add(new GenreDTO("Adventure"));
+//        }});
+//        movieDTOToUpdate.setActors(new HashSet<>() {{
+//            add(new ActorDTO("Actor 1"));
+//            add(new ActorDTO("Actor 2"));
+//        }});
+//        movieDTOToUpdate.setDirector(null);
+//        movieService.updateMovie(movieDTOToUpdate);
+//
+//        System.out.println("Updated movie: " + movieDTOToUpdate.buildMovieDetails());
+
+
+        // Search movies with title "star"
+        List<MovieDTO> searchResults = movieService.searchMoviesByTitle("star");
+        for (MovieDTO movie : searchResults) {
+            System.out.println("Found Movie: " + movie.getTitle());
+        }
+
+        // Get the total average rating of all movies
+        double totalAverageRating = movieService.getTotalAverageRating();
+        System.out.println("Total average rating of all movies: " + totalAverageRating);
+
+        // Get the top 10 highest rated movies
+        List<MovieDTO> top10HighestRatedMovies = movieService.getTopXHighestRatedMovies(10);
+        System.out.println("Top 10 highest rated movie: ");
+        for (MovieDTO movie : top10HighestRatedMovies) {
+            System.out.println(movie.getTitle() + " - " + movie.getVoteAverage());
+        }
+
+        // Get the top 10 lowest rated movies
+        List<MovieDTO> top10LowestRatedMovies = movieService.getTopXLowestRatedMovies(10);
+        System.out.println("Top 10 lowest rated movie: ");
+        for (MovieDTO movie : top10LowestRatedMovies) {
+            System.out.println(movie.getTitle() + " - " + movie.getVoteAverage());
+        }
+
+        // Get the top 10 most popular movies
+        List<MovieDTO> top10MostPopularMovies = movieService.getTopXMostPopularMovies(10);
+        System.out.println("Top 10 most popular movie: ");
+        for (MovieDTO movie : top10MostPopularMovies) {
+            System.out.println(movie.getTitle() + " - " + movie.getPopularity());
+        }
+
     }
 }

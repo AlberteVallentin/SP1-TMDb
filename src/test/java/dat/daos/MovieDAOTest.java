@@ -1,87 +1,254 @@
 package dat.daos;
 
 import dat.config.HibernateConfig;
-import dat.entities.Actor;
-import dat.entities.Director;
-import dat.entities.Genre;
+import dat.dtos.ActorDTO;
+import dat.dtos.DirectorDTO;
+import dat.dtos.GenreDTO;
+import dat.dtos.MovieDTO;
 import dat.entities.Movie;
+import dat.exceptions.JpaException;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MovieDAOTest {
 
     private static EntityManagerFactory emf;
     private static MovieDAO movieDAO;
+    private static MovieDTO m1;
+    private static MovieDTO m2;
 
     @BeforeAll
-    static void beforeAll() {
-        // Initialize EntityManagerFactory and DAO before all tests
+    static void setUpBeforeAll() {
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         movieDAO = new MovieDAO(emf);
     }
 
-    @AfterEach
-    void tearDown() {
-        // Close EntityManagerFactory after each test
-        emf.close();
+    @BeforeEach
+    void setUp() {
+        // Clear the database before each test
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.createQuery("DELETE FROM Movie").executeUpdate();
+            em.createNativeQuery("ALTER SEQUENCE movie_id_seq RESTART WITH 1").executeUpdate();
+            em.createQuery("DELETE FROM Actor").executeUpdate();
+            em.createNativeQuery("ALTER SEQUENCE actor_id_seq RESTART WITH 1").executeUpdate();
+            em.createQuery("DELETE FROM Director").executeUpdate();
+            em.createNativeQuery("ALTER SEQUENCE director_id_seq RESTART WITH 1").executeUpdate();
+            em.createQuery("DELETE FROM Genre").executeUpdate();
+            em.createNativeQuery("ALTER SEQUENCE genre_id_seq RESTART WITH 1").executeUpdate();
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Initialize and persist MovieDTO objects
+        m1 = new MovieDTO();
+        m1.setTitle("Test 1");
+        m1.setEnglishTitle("English title 1");
+        m1.setReleaseDate(LocalDate.of(2024, 7, 14));
+        m1.setVoteAverage(8.0);
+        m1.setPopularity(3.4);
+        m1.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
+        m1.setActors(new HashSet<>() {{
+            add(new ActorDTO("Tom Hanks"));
+        }});
+        m1.setDirector(new DirectorDTO("Steven Spielberg"));
+
+        m2 = new MovieDTO();
+        m2.setTitle("Test 2");
+        m2.setEnglishTitle(null);
+        m2.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m2.setVoteAverage(9.0);
+        m2.setPopularity(5.6);
+        m2.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Action"));
+            add(new GenreDTO("War"));
+        }});
+        m2.setActors(new HashSet<>() {{
+            add(new ActorDTO("Actor 1"));
+            add(new ActorDTO("Actor 2"));
+        }});
+        m2.setDirector(new DirectorDTO("Director"));
+
+        // Convert MovieDTO to Movie entity
+        Movie movie1 = m1.toEntity();
+        Movie movie2 = MovieDAOTest.m2.toEntity();
+
+        // Persist the movies
+        movieDAO.create(movie1);
+        movieDAO.create(movie2);
+
+        // Set the IDs of the MovieDTO objects
+        m1.setId(movie1.getId());
+        MovieDAOTest.m2.setId(movie2.getId());
+
+
     }
 
     @Test
+    @DisplayName("Test create movie")
     void create() {
-        // Step 1: Create a new movie instance with details
-        Movie movie = new Movie();
-        movie.setTitle("Inception");
-        movie.setEnglishTitle("Inception");
-        movie.setReleaseDate(LocalDate.of(2010, 7, 16));
-        movie.setVoteAverage(8.8);
 
-        // Step 2: Create actors and add them to a Set
-        Actor actor1 = new Actor();
-        actor1.setName("Leonardo DiCaprio");
+        // Create a new movieDTO
+        MovieDTO m3 = new MovieDTO();
+        m3.setTitle("titel");
+        m3.setEnglishTitle(null);
+        m3.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m3.setVoteAverage(0.0);
+        m3.setPopularity(3.4);
+        m3.setGenres(new HashSet<>() {{
+                add(new GenreDTO("Drama"));
+                add(new GenreDTO("War"));
+            }});
+        m3.setActors(new HashSet<>() {{
+                add(new ActorDTO("Actor 1"));
+                add(new ActorDTO("Actor 2"));
+            }});
+        m3.setDirector(new DirectorDTO("Director"));
 
-        Actor actor2 = new Actor();
-        actor2.setName("Joseph Gordon-Levitt");
+        // Create the movie
+        Movie movie3 = m3.toEntity();
+        movieDAO.create(movie3);
 
-        Set<Actor> actors = new HashSet<>();
-        actors.add(actor1);
-        actors.add(actor2);
-        movie.setActors(actors);
+        // Set the ID of the MovieDTO object
+        m3.setId(movie3.getId());
 
-        // Step 3: Create genres and add them to a Set
-        Genre genre1 = new Genre();
-        genre1.setGenreName("Action");
+        // Check if the movie was created
+        assertNotNull(m3.getId());
 
-        Genre genre2 = new Genre();
-        genre2.setGenreName("Sci-Fi");
 
-        Set<Genre> genres = new HashSet<>();
-        genres.add(genre1);
-        genres.add(genre2);
-        movie.setGenres(genres);
-
-        // Step 4: Create a director and set it to the movie
-        Director director = new Director();
-        director.setName("Christopher Nolan");
-        movie.setDirector(director);
-
-        // Step 5: Persist the movie using the DAO
-        movieDAO.create(movie);
-
-        // Step 6: Fetch the movie back from the database
-        Optional<Movie> fetchedMovie = movieDAO.findById(movie.getId());
-
-        // Step 7: Assertions to verify the movie and its relationships
-        assertTrue(fetchedMovie.isPresent(), "Movie should be present in the database");
-        //assertEquals("Inception", fetchedMovie.get().getTitle(), "The movie title should match");
-        //assertEquals(2, fetchedMovie.get().getActors().size(), "There should be 2 actors associated with the movie");
-        //assertEquals(2, fetchedMovie.get().getGenres().size(), "There should be 2 genres associated with the movie");
-        //assertEquals("Christopher Nolan", fetchedMovie.get().getDirector().getName(), "Director name should match");
     }
+
+    @Test
+    public void findById() {
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Expected movie ID
+        Long expectedId = 1L;
+
+        // Check if the movie ID is correct
+        assertEquals(expectedId, optionalMovie.get().getId());
+    }
+
+    @Test
+    void findAll() {
+        // Find all movies
+        List<Movie> movies = movieDAO.findAll();
+
+        // Check if all movies were found
+        assertEquals(2, movies.size());
+
+        // Check if the movie titles are correct
+        assertEquals("Test 1", movies.get(0).getTitle());
+        assertEquals("Test 2", movies.get(1).getTitle());
+    }
+
+    @Test
+    void update() {
+        // Update the first movie
+        m1.setTitle("Updated title");
+        m1.setEnglishTitle("Updated English title");
+        m1.setReleaseDate(LocalDate.of(2023, 03, 14));
+        m1.setVoteAverage(9.0);
+        m1.setPopularity(2.0);
+        m1.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Action"));
+            add(new GenreDTO("Adventure"));
+        }});
+        m1.setActors(new HashSet<>() {{
+            add(new ActorDTO("New actor"));
+            add(new ActorDTO("New actor 2"));
+        }});
+        m1.setDirector(new DirectorDTO("Updated director"));
+
+        // Update the movie
+        movieDAO.update(m1.toEntity());
+
+        // Find the updated movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Check if the movie was updated
+        assertEquals("Updated title", optionalMovie.get().getTitle());
+        assertEquals("Updated English title", optionalMovie.get().getEnglishTitle());
+        assertEquals(LocalDate.of(2023, 03, 14), optionalMovie.get().getReleaseDate());
+        assertEquals(9.0, optionalMovie.get().getVoteAverage());
+        assertEquals(2, optionalMovie.get().getGenres().size());
+        assertEquals(2, optionalMovie.get().getActors().size());
+        assertEquals("Updated director", optionalMovie.get().getDirector().getName());
+
+    }
+
+    @Test
+    void delete() {
+        // Delete the first movie
+        movieDAO.delete(m1.getId());
+
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findById(m1.getId());
+
+        // Check if the movie was deleted
+        assertFalse(optionalMovie.isPresent());
+    }
+
+    @Test
+    void findByName() {
+        // Find the first movie
+        Optional<Movie> optionalMovie = movieDAO.findByName("test 1");
+
+
+        // Check if the movie was found
+        assertTrue(optionalMovie.isPresent());
+
+        // Expected movie title
+        String expectedTitle = "Test 1";
+
+        // Check if the movie title is correct
+        assertEquals(expectedTitle, optionalMovie.get().getTitle());
+    }
+
+    @Test
+    void movieAlreadyExists() {
+        // Try to create a movie that already exists
+        MovieDTO m3 = new MovieDTO();
+        m3.setTitle("Test 1");
+        m3.setEnglishTitle("English title 1");
+        m3.setReleaseDate(LocalDate.of(2024, 7, 14));
+        m3.setVoteAverage(8.0);
+        m3.setPopularity(3.4);
+        m3.setGenres(new HashSet<>() {{
+            add(new GenreDTO("Drama"));
+            add(new GenreDTO("War"));
+        }});
+        m3.setActors(new HashSet<>() {{
+            add(new ActorDTO("Tom Hanks"));
+        }});
+        m3.setDirector(new DirectorDTO("Steven Spielberg"));
+
+        // Try to create the movie
+        Movie movie3 = m3.toEntity();
+
+        // Check if the exception was thrown
+        assertThrows(JpaException.class, () -> movieDAO.create(movie3));
+    }
+
+
 }

@@ -50,6 +50,7 @@ public class DirectorDAO implements IDAO<Director> {
         }
     }
 
+
     @Override
     public void delete(Long id) {
         try (EntityManager em = emf.createEntityManager()) {

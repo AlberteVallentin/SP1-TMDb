@@ -1,28 +1,27 @@
+// MovieDTO.java
 package dat.dtos;
 
+import dat.entities.Movie;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import dat.entities.Director;
-import dat.entities.Movie;
-import dat.entities.Actor;
-import dat.entities.Genre;
-import lombok.*;
 
 @Data
 @NoArgsConstructor
-
 public class MovieDTO {
     private Long id;
     private String title;
     private String englishTitle;
     private LocalDate releaseDate;
     private double voteAverage;
+    private double popularity;
 
-    private List<GenreDTO> genres;
-    private List<ActorDTO> actors;
+    private Set<GenreDTO> genres;
+    private Set<ActorDTO> actors;
     private DirectorDTO director;
 
     // Constructor to convert Movie entity to MovieDTO
@@ -32,19 +31,23 @@ public class MovieDTO {
         this.englishTitle = movie.getEnglishTitle();
         this.releaseDate = movie.getReleaseDate();
         this.voteAverage = movie.getVoteAverage();
+        this.popularity = movie.getPopularity();
 
         // Convert Genre, Actor, Director to DTOs
-        this.genres = movie.getGenres()
-            .stream()
-            .map(GenreDTO::new)
-            .toList();
-        this.actors = movie.getActors()
-            .stream()
-            .map(ActorDTO::new)
-            .toList();
+        this.genres = movie.getGenres() != null ? movie.getGenres().stream().map(GenreDTO::new).collect(Collectors.toSet()) : null;
+        this.actors = movie.getActors() != null ? movie.getActors().stream().map(ActorDTO::new).collect(Collectors.toSet()) : null;
+        this.director = movie.getDirector() != null ? new DirectorDTO(movie.getDirector()) : null;
+    }
 
-        this.director = new DirectorDTO
-            (movie.getDirector());
+    public MovieDTO(String title, String englishTitle, LocalDate releaseDate, double voteAverage, double popularity, DirectorDTO director, Set<GenreDTO> genres, Set<ActorDTO> actors) {
+        this.title = title;
+        this.englishTitle = englishTitle;
+        this.releaseDate = releaseDate;
+        this.voteAverage = voteAverage;
+        this.popularity = popularity;
+        this.director = director;
+        this.genres = genres;
+        this.actors = actors;
     }
 
     // Method to convert MovieDTO to Movie entity
@@ -55,19 +58,50 @@ public class MovieDTO {
         movie.setEnglishTitle(this.englishTitle);
         movie.setReleaseDate(this.releaseDate);
         movie.setVoteAverage(this.voteAverage);
+        movie.setPopularity(this.popularity);
 
         if (this.genres != null) {
-            movie.setGenres(this.genres.stream().map(Genre::new).collect(Collectors.toSet()));
+            movie.setGenres(this.genres.stream().map(GenreDTO::toEntity).collect(Collectors.toSet()));
         }
         if (this.actors != null) {
-            movie.setActors(this.actors.stream().map(Actor::new).collect(Collectors.toSet()));
+            movie.setActors(this.actors.stream().map(ActorDTO::toEntity).collect(Collectors.toSet()));
         }
         if (this.director != null) {
-            movie.setDirector(new Director(this.director));
+            movie.setDirector(this.director.toEntity());
         }
 
         return movie;
     }
+
+    public String buildMovieDetails() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Movie Details:\n");
+        sb.append("ID: ").append(id).append("\n");
+        sb.append("Title: ").append(title).append("\n");
+        if (englishTitle != null) {
+            sb.append("English Title: ").append(englishTitle).append("\n");
+        }
+        sb.append("Release Date: ").append(releaseDate).append("\n");
+        sb.append("Vote Average: ").append(voteAverage).append("\n");
+        sb.append("Popularity: ").append(popularity).append("\n");
+        if (genres != null && !genres.isEmpty()) {
+            sb.append("Genres: ");
+            genres.forEach(genre -> sb.append(genre.getGenreName()).append(", "));
+            sb.setLength(sb.length() - 2); // Remove the last comma and space
+            sb.append("\n");
+        }
+        if (actors != null && !actors.isEmpty()) {
+            sb.append("Actors: ");
+            actors.forEach(actor -> sb.append(actor.getName()).append(", "));
+            sb.setLength(sb.length() - 2); // Remove the last comma and space
+            sb.append("\n");
+        }
+        if (director != null) {
+            sb.append("Director: ").append(director.getName()).append("\n");
+        }
+        return sb.toString();
+    }
 }
+
 
 

@@ -23,7 +23,5 @@ public class Director {
     @OneToMany(mappedBy = "director")
     private List<Movie> movies;
 
-    public Director(DirectorDTO directorDTO) {
-        this.name = directorDTO.getName();
-    }
+
 }

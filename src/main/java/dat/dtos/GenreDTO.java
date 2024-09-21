@@ -16,10 +16,14 @@ public class GenreDTO {
         this.genreName = genre.getGenreName();
     }
 
+
+    public GenreDTO(String genreName) {
+        this.genreName = genreName;
+    }
+
     // Method to convert GenreDTO to Genre entity
     public Genre toEntity() {
         Genre genre = new Genre();
-        genre.setId(this.id);
         genre.setGenreName(this.genreName);
         return genre;
     }

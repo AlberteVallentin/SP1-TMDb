@@ -1,3 +1,4 @@
+// MovieFetcher.java
 package dat.services;
 
 import java.net.URI;
@@ -6,9 +7,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,18 +38,18 @@ public class MovieFetcher {
         HttpClient client = HttpClient.newHttpClient();
 
         // Step 1: Fetch Danish movies between 2019-09-10 and 2024-09-10
-        List<Long> movieIds = fetchDanishMovies(client);
+        Set<Long> movieIds = fetchDanishMovies(client);
 
-        // Step 2: Fetch details for each movie ID and return them as a list of MovieDTOs
-        List<MovieDTO> movieDTOList = fetchDetailsForMovies(client, movieIds);
+        // Step 2: Fetch details for each movie ID and return them as a set of MovieDTOs
+        Set<MovieDTO> movieDTOSet = fetchDetailsForMovies(client, movieIds);
 
         // Step 3: Convert and save these DTO's to entities and persist them to the database
-        saveMoviesToDatabase(movieDTOList);
+        saveMoviesToDatabase(movieDTOSet);
     }
 
     // Step 1: Fetch all Danish movie ID's between 2019-09-17 and 2024-09-17
-    private static List<Long> fetchDanishMovies(HttpClient client) throws Exception {
-        List<Long> movieIds = new ArrayList<>();
+    private static Set<Long> fetchDanishMovies(HttpClient client) throws Exception {
+        Set<Long> movieIds = new HashSet<>();
         int page = 1;
         int totalPages;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -105,11 +106,11 @@ public class MovieFetcher {
     }
 
     // Step 2: Fetch details for each movie ID, including actors, director, genre, and vote average
-    private static List<MovieDTO> fetchDetailsForMovies(HttpClient client, List<Long> movieIds) throws Exception {
+    private static Set<MovieDTO> fetchDetailsForMovies(HttpClient client, Set<Long> movieIds) throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
         // Fetch MovieDTOs for each movie ID
-        List<CompletableFuture<MovieDTO>> futures = movieIds.stream()
+        Set<CompletableFuture<MovieDTO>> futures = movieIds.stream()
             .map(movieId -> CompletableFuture.supplyAsync(() -> {
                 try {
                     return fetchMovieDetails(client, movieId).join();
@@ -118,16 +119,16 @@ public class MovieFetcher {
                     return null;
                 }
             }, executor))
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
 
         // Wait for all async calls to complete and collect the results
-        List<MovieDTO> movieDTOs = futures.stream()
+        Set<MovieDTO> movieDTOs = futures.stream()
             .map(CompletableFuture::join)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
 
         executor.shutdown();
 
-        return movieDTOs; // Return the list of MovieDTOs
+        return movieDTOs; // Return the set of MovieDTOs
     }
 
     // Fetch movie details and convert them to MovieDTO
@@ -151,6 +152,7 @@ public class MovieFetcher {
                     movieDTO.setTitle(movieDetails.get("original_title").asText());
                     movieDTO.setEnglishTitle(movieDetails.get("title").asText());
 
+
                     // Check if release_date is not null or empty
                     JsonNode releaseDateNode = movieDetails.get("release_date");
                     if (releaseDateNode != null && !releaseDateNode.asText().isEmpty()) {
@@ -161,26 +163,27 @@ public class MovieFetcher {
                     }
 
                     movieDTO.setVoteAverage(movieDetails.get("vote_average").asDouble());
+                    movieDTO.setPopularity(movieDetails.get("popularity").asDouble());
 
                     // Extract genres
                     JsonNode genres = movieDetails.get("genres");
-                    List<GenreDTO> genreList = new ArrayList<>();
+                    Set<GenreDTO> genreSet = new HashSet<>();
                     for (JsonNode genre : genres) {
                         GenreDTO genreDTO = new GenreDTO();
                         genreDTO.setGenreName(genre.get("name").asText());
-                        genreList.add(genreDTO);
+                        genreSet.add(genreDTO);
                     }
-                    movieDTO.setGenres(genreList);
+                    movieDTO.setGenres(genreSet);
 
                     // Extract actors
                     JsonNode cast = movieDetails.get("credits").get("cast");
-                    List<ActorDTO> actorList = new ArrayList<>();
+                    Set<ActorDTO> actorSet = new HashSet<>();
                     for (JsonNode actor : cast) {
                         ActorDTO actorDTO = new ActorDTO();
                         actorDTO.setName(actor.get("original_name").asText());
-                        actorList.add(actorDTO);
+                        actorSet.add(actorDTO);
                     }
-                    movieDTO.setActors(actorList);
+                    movieDTO.setActors(actorSet);
 
                     // Extract director
                     JsonNode crew = movieDetails.get("credits").get("crew");
@@ -203,17 +206,17 @@ public class MovieFetcher {
     }
 
     // Step 3: Save the movies, actors, directors, and genres to the database
-    private static void saveMoviesToDatabase(List<MovieDTO> movieDTOList) {
+    private static void saveMoviesToDatabase(Set<MovieDTO> movieDTOSet) {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory("movie_db");
         try (var em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
-            for (MovieDTO movieDTO : movieDTOList) {
+            for (MovieDTO movieDTO : movieDTOSet) {
                 // Convert DTOs to entities
-                Movie movie = new Movie(movieDTO);
+                Movie movie = movieDTO.toEntity();
 
                 // Check if actors exist, if not persist them
-                List<Actor> actorsToAdd = new ArrayList<>();
+                Set<Actor> actorsToAdd = new HashSet<>();
                 for (Iterator<Actor> iterator = movie.getActors().iterator(); iterator.hasNext(); ) {
                     Actor actor = iterator.next();
                     Actor existingActor = em.createQuery("SELECT a FROM Actor a WHERE a.name = :name", Actor.class)
@@ -245,7 +248,7 @@ public class MovieFetcher {
                 }
 
                 // Check if genres exist, if not persist them
-                List<Genre> genresToAdd = new ArrayList<>();
+                Set<Genre> genresToAdd = new HashSet<>();
                 for (Iterator<Genre> iterator = movie.getGenres().iterator(); iterator.hasNext(); ) {
                     Genre genre = iterator.next();
                     Genre existingGenre = em.createQuery("SELECT g FROM Genre g WHERE g.genreName = :genreName", Genre.class)

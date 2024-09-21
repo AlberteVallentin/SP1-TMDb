@@ -50,6 +50,7 @@ public class ActorDAO implements IDAO<Actor> {
         }
     }
 
+
     @Override
     public void delete(Long id) {
         try (EntityManager em = emf.createEntityManager()) {
