@@ -1,5 +1,6 @@
 package dat.daos;
 
+import dat.entities.Actor;
 import dat.entities.Director;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -19,9 +20,17 @@ public class DirectorDAO implements IDAO<Director> {
     @Override
     public void create(Director entity) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Check if the actor already exists
+            Optional<Director> existingDirector = findByName(entity.getName());
+            if (existingDirector.isPresent()) {
+                System.out.println("Director with the name '" + entity.getName() + "' already exists.");
+                return;  // Avoid inserting a duplicate actor
+            }
             em.getTransaction().begin();
-            em.persist(entity);
+            em.persist(entity);  // Persist the new actor
             em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -45,8 +54,23 @@ public class DirectorDAO implements IDAO<Director> {
     public void update(Director entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
+
+            // Find the director by ID to ensure it exists
+            Director existingDirector = em.find(Director.class, entity.getId());
+            if (existingDirector == null) {
+                throw new IllegalArgumentException("Director with ID " + entity.getId() + " does not exist.");
+            }
+
+            // Optional: Compare key fields (such as name) if necessary
+            if (!existingDirector.getName().equals(entity.getName())) {
+                System.out.println("Updating director name...");
+            }
+
+            // Perform the update (merge returns the updated entity)
             em.merge(entity);
             em.getTransaction().commit();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();  // Log the error or handle accordingly
         }
     }
 

@@ -19,10 +19,20 @@ public class ActorDAO implements IDAO<Actor> {
     @Override
     public void create(Actor entity) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Check if the actor already exists
+            Optional<Actor> existingActor = findByName(entity.getName());
+            if (existingActor.isPresent()) {
+                System.out.println("Actor with the name '" + entity.getName() + "' already exists.");
+                return;  // Avoid inserting a duplicate actor
+            }
+
             em.getTransaction().begin();
-            em.persist(entity);
+            em.persist(entity);  // Persist the new actor
             em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override
@@ -45,8 +55,23 @@ public class ActorDAO implements IDAO<Actor> {
     public void update(Actor entity) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
+
+            // Find the actor by ID to ensure it exists
+            Actor existingActor = em.find(Actor.class, entity.getId());
+            if (existingActor == null) {
+                throw new IllegalArgumentException("Actor with ID " + entity.getId() + " does not exist.");
+            }
+
+            // Optional: Compare key fields (such as name) if necessary
+            if (!existingActor.getName().equals(entity.getName())) {
+                System.out.println("Updating actor name...");
+            }
+
+            // Perform the update (merge returns the updated entity)
             em.merge(entity);
             em.getTransaction().commit();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();  // Log the error or handle accordingly
         }
     }
 
