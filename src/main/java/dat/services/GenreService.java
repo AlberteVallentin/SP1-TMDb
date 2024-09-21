@@ -57,9 +57,14 @@ public class GenreService {
 
     // Get all genres
     public List<GenreDTO> getAllGenres() {
-        return genreDAO.findAll().stream()
-            .map(GenreDTO::new)
-            .collect(Collectors.toList());
+        try {
+            return genreDAO.findAll().stream()
+                .map(GenreDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get all genres: " + e.getMessage());
+            throw e;
+        }
     }
 
     // Delete genre by ID
@@ -85,9 +90,14 @@ public class GenreService {
 
     // Fetch all movies within a genre
     public List<MovieDTO> getMoviesByGenre(String genreName) {
-        return genreDAO.findMoviesByGenre(genreName).stream()
-            .map(MovieDTO::new)
-            .collect(Collectors.toList());
+        try {
+            return genreDAO.findMoviesByGenre(genreName).stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to find movies by genre: " + e.getMessage());
+            throw e;
+        }
     }
 
     public static void main(String[] args) {

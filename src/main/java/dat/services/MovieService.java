@@ -62,9 +62,15 @@ public class MovieService {
     }
 
     public List<MovieDTO> getAllMovies() {
-        return movieDAO.findAll().stream()
-            .map(MovieDTO::new)
-            .collect(Collectors.toList());
+        try {
+            List<Movie> movies = movieDAO.findAll();
+            return movies.stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get all movies: " + e.getMessage());
+            throw e;
+        }
     }
 
 
