@@ -1,5 +1,6 @@
 package dat.daos;
 
+import dat.entities.Actor;
 import dat.entities.Director;
 import dat.entities.Movie;
 import dat.exceptions.JpaException;
@@ -21,6 +22,12 @@ public class DirectorDAO implements IDAO<Director> {
     @Override
     public void create(Director director) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Check if the actor already exists
+            Optional<Director> existingDirector = findByName(entity.getName());
+            if (existingDirector.isPresent()) {
+                System.out.println("Director with the name '" + entity.getName() + "' already exists.");
+                return;  // Avoid inserting a duplicate actor
+            }
             em.getTransaction().begin();
 
             // Validate that the director's name is not null
@@ -45,6 +52,7 @@ public class DirectorDAO implements IDAO<Director> {
             em.getTransaction().commit();
         } catch (Exception e) {
             throw new JpaException("Failed to create director in the database", e);
+
         }
     }
 
@@ -68,6 +76,7 @@ public class DirectorDAO implements IDAO<Director> {
     public void update(Director director) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
+
 
             // Find the existing director in the database
             Director existingDirector = em.find(Director.class, director.getId());

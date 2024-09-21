@@ -4,14 +4,17 @@ import dat.config.HibernateConfig;
 import dat.dtos.ActorDTO;
 import dat.entities.Actor;
 import dat.entities.Movie;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ActorDAOTest {
@@ -20,6 +23,7 @@ class ActorDAOTest {
     private static ActorDAO actorDAO;
     private static ActorDTO a1;
     private static ActorDTO a2;
+
 
     @BeforeAll
     static void setUpBeforeAll() {
@@ -54,6 +58,7 @@ class ActorDAOTest {
         a1.setId(actor1.getId());
         a2.setId(actor2.getId());
     }
+
 
     @Test
     void createActor() {
