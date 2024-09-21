@@ -55,7 +55,7 @@ public class ActorService {
 
     public List<MovieDTO> getMoviesByActorName(String actorName) {
         try {
-            List<Movie> movies = actorDAO.findMoviesByActor(actorName);
+            List<Movie> movies = actorDAO.findMoviesWithActor(actorName);
             return movies.stream().map(MovieDTO::new).collect(Collectors.toList());
         } catch (JpaException e) {
             System.out.println("Failed to find movies by actor: " + e.getMessage());
@@ -100,6 +100,13 @@ public class ActorService {
         // Find actor by name
         Optional<Actor> actor = actorService.findActorByName("Mathias Broe");
         System.out.println("Actor found by name: " + actor.get().getName());
+
+
+        // Find all movies with actor
+        List<MovieDTO> movies = actorService.getMoviesByActorName("Mathias Broe");
+        for (MovieDTO movie : movies) {
+            System.out.println("Movie with "+ actor.get().getName() + " in it: " + movie.getTitle());
         }
 
     }
+}

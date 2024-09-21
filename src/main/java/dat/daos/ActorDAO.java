@@ -133,7 +133,7 @@ public class ActorDAO implements IDAO<Actor> {
     }
 
     // Fetch all movies in which the actor has been part
-    public List<Movie> findMoviesByActor(String actorName) {
+    public List<Movie> findMoviesWithActor(String actorName) {
         try (EntityManager em = emf.createEntityManager()) {
             TypedQuery<Movie> query = em.createQuery(
                 "SELECT m FROM Movie m JOIN m.actors a WHERE LOWER(a.name) = LOWER(:actorName)", Movie.class);

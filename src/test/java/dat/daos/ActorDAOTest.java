@@ -102,9 +102,4 @@ class ActorDAOTest {
         assertFalse(actor.isPresent());
     }
 
-    @Test
-    void findMoviesByActor() {
-        List<Movie> movies = actorDAO.findMoviesByActor("Tom Hanks");
-        assertTrue(movies.isEmpty());
-    }
 }

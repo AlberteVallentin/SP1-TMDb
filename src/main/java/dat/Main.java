@@ -2,15 +2,8 @@
 package dat;
 
 import dat.config.HibernateConfig;
-import dat.daos.MovieDAO;
-import dat.dtos.ActorDTO;
-import dat.dtos.DirectorDTO;
-import dat.dtos.GenreDTO;
+
 import dat.dtos.MovieDTO;
-import dat.entities.Actor;
-import dat.entities.Director;
-import dat.entities.Genre;
-import dat.entities.Movie;
 import dat.services.MovieService;
 import jakarta.persistence.EntityManagerFactory;
 
