@@ -22,6 +22,13 @@ public class ActorDAO implements IDAO<Actor> {
     @Override
     public void create(Actor actor) {
         try (EntityManager em = emf.createEntityManager()) {
+            // Check if the actor already exists
+            Optional<Actor> existingActor = findByName(entity.getName());
+            if (existingActor.isPresent()) {
+                System.out.println("Actor with the name '" + entity.getName() + "' already exists.");
+                return;  // Avoid inserting a duplicate actor
+            }
+
             em.getTransaction().begin();
 
             // Validate that the actor's name is not null
@@ -46,7 +53,11 @@ public class ActorDAO implements IDAO<Actor> {
             em.getTransaction().commit();
         } catch (Exception e) {
             throw new JpaException("Failed to create actor in the database", e);
+
+
+
         }
+
     }
 
     @Override
@@ -69,6 +80,7 @@ public class ActorDAO implements IDAO<Actor> {
     public void update(Actor actor) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
+
 
             // Find the existing actor in the database
             Actor existingActor = em.find(Actor.class, actor.getId());

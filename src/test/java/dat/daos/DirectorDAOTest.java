@@ -3,10 +3,13 @@ package dat.daos;
 import dat.config.HibernateConfig;
 import dat.dtos.DirectorDTO;
 import dat.entities.Director;
+
 import dat.entities.Movie;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+
 class DirectorDAOTest {
 
     private static EntityManagerFactory emf;
@@ -23,12 +27,14 @@ class DirectorDAOTest {
 
     @BeforeAll
     static void setUpBeforeAll() {
+
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         directorDAO = new DirectorDAO(emf);
     }
 
     @BeforeEach
     void setUp() {
+
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             em.createQuery("DELETE FROM Director").executeUpdate();
@@ -54,6 +60,7 @@ class DirectorDAOTest {
         d1.setId(director1.getId());
         d2.setId(director2.getId());
     }
+
 
     @Test
     void createDirector() {
