@@ -133,7 +133,17 @@ public class MovieService {
         }
     }
 
-
+    // Get the top X most popular movies
+    public List<MovieDTO> getTopXMostPopularMovies(int x) {
+        try {
+            return movieDAO.getTheTopXMostPopularMovies(x).stream()
+                .map(MovieDTO::new)
+                .collect(Collectors.toList());
+        } catch (JpaException e) {
+            System.out.println("Failed to get top " + x + " most popular movies: " + e.getMessage());
+            throw e;
+        }
+    }
 
 
     public static void main(String[] args) {
@@ -204,14 +214,23 @@ public class MovieService {
 
         // Get the top 10 highest rated movies
         List<MovieDTO> top10HighestRatedMovies = movieService.getTopXHighestRatedMovies(10);
+        System.out.println("Top 10 highest rated movie: ");
         for (MovieDTO movie : top10HighestRatedMovies) {
-            System.out.println("Top 10 highest rated movie: " + movie.getTitle() + " - " + movie.getVoteAverage());
+            System.out.println(movie.getTitle() + " - " + movie.getVoteAverage());
         }
 
         // Get the top 10 lowest rated movies
         List<MovieDTO> top10LowestRatedMovies = movieService.getTopXLowestRatedMovies(10);
+        System.out.println("Top 10 lowest rated movie: ");
         for (MovieDTO movie : top10LowestRatedMovies) {
-            System.out.println("Top 10 lowest rated movie: " + movie.getTitle() + " - " + movie.getVoteAverage());
+            System.out.println(movie.getTitle() + " - " + movie.getVoteAverage());
+        }
+
+        // Get the top 10 most popular movies
+        List<MovieDTO> top10MostPopularMovies = movieService.getTopXMostPopularMovies(10);
+        System.out.println("Top 10 most popular movie: ");
+        for (MovieDTO movie : top10MostPopularMovies) {
+            System.out.println(movie.getTitle() + " - " + movie.getPopularity());
         }
 
     }

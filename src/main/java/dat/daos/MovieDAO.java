@@ -297,4 +297,14 @@ public class MovieDAO implements IDAO<Movie> {
         }
     }
 
+    public List<Movie> getTheTopXMostPopularMovies(int x) {
+        try (EntityManager em = emf.createEntityManager()) {
+            TypedQuery<Movie> query = em.createQuery("SELECT m FROM Movie m ORDER BY m.popularity DESC", Movie.class);
+            query.setMaxResults(x);  // Limit the number of results to x
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new JpaException("Failed to get top " + x + " most popular movies", e);
+        }
+    }
+
 }
