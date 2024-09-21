@@ -23,9 +23,9 @@ public class ActorDAO implements IDAO<Actor> {
     public void create(Actor actor) {
         try (EntityManager em = emf.createEntityManager()) {
             // Check if the actor already exists
-            Optional<Actor> existingActor = findByName(entity.getName());
+            Optional<Actor> existingActor = findByName(actor.getName());
             if (existingActor.isPresent()) {
-                System.out.println("Actor with the name '" + entity.getName() + "' already exists.");
+                System.out.println("Actor with the name '" + actor.getName() + "' already exists.");
                 return;  // Avoid inserting a duplicate actor
             }
 

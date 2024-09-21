@@ -23,9 +23,9 @@ public class DirectorDAO implements IDAO<Director> {
     public void create(Director director) {
         try (EntityManager em = emf.createEntityManager()) {
             // Check if the actor already exists
-            Optional<Director> existingDirector = findByName(entity.getName());
+            Optional<Director> existingDirector = findByName(director.getName());
             if (existingDirector.isPresent()) {
-                System.out.println("Director with the name '" + entity.getName() + "' already exists.");
+                System.out.println("Director with the name '" + director.getName() + "' already exists.");
                 return;  // Avoid inserting a duplicate actor
             }
             em.getTransaction().begin();
